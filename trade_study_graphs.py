@@ -1,10 +1,11 @@
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 
 
 # TODO: check units for....basically everything
 # TODO: also, check equations and see what the proper equation for supersonic flight is...I just kinda guesseed
-def takeoffWeight(SFC_subsonic, SFC_supersonic, L2D_max, R_subsonic, R_supersonic, E):
+def takeoffWeight(SFC_subsonic, SFC_supersonic, R_subsonic, R_supersonic, L2D_max, E):
     # SFC values in 1/hr units
     # L2D is unitless
     # ranges are in mi
@@ -93,47 +94,79 @@ def takeoffWeight(SFC_subsonic, SFC_supersonic, L2D_max, R_subsonic, R_supersoni
 parameters_dictionary = {
     "SFC_subsonic": 0.9,
     "SFC_supersonic": 1.5,
-    "L2D_max": 16.6,
     "R_subsonic": 1200,
     "R_supersonic": 75,
+    "L2D_max": 16.6,
     "E": 1 / 2,
 }
 W0_accumiliation = {
     "SFC_subsonic": [],
     "SFC_supersonic": [],
-    "L2D_max": [],
     "R_subsonic": [],
     "R_supersonic": [],
+    "L2D_max": [],
+    "E": [],
+}
+study_vals = {
+    "SFC_subsonic": [],
+    "SFC_supersonic": [],
+    "R_subsonic": [],
+    "R_supersonic": [],
+    "L2D_max": [],
     "E": [],
 }
 
-# vary all parameter
-for parameter in [
+# vary all parameters
+parameters = [
     "SFC_subsonic",
     "SFC_supersonic",
-    "L2D_max",
-    "R_supersonic",
     "R_subsonic",
+    "R_supersonic",
+    "L2D_max",
     "E",
-]:
+]
+for param in parameters:
     W0 = []
-    if parameter != "L2D_max":
+    if param != "L2D_max":
         val_range = np.arange(
-            0.75 * parameters_dictionary[parameter],
-            1.25 * parameters_dictionary[parameter] + 0.01,
-            parameters_dictionary[parameter] / 10,
+            0.8 * parameters_dictionary[param],
+            1.2 * parameters_dictionary[param] + 0.01,
+            parameters_dictionary[param] / 10,
         )
     else:
         val_range = np.arange(
-            0.9 * parameters_dictionary[parameter],
-            1.5 * parameters_dictionary[parameter] + 0.01,
-            parameters_dictionary[parameter] / 10,
+            0.9 * parameters_dictionary[param],
+            1.1 * parameters_dictionary[param] + 0.01,
+            parameters_dictionary[param] / 10,
         )
+    study_vals[param] = val_range
 
     for val in val_range:
-        kwargs = parameters_dictionary
-        kwargs.update({parameter: val})
+        kwargs = parameters_dictionary.copy()
+        kwargs[param] = val
         W0.append(takeoffWeight(**kwargs))
-    W0_accumiliation[parameter] = W0
+    W0_accumiliation[param] = W0
 
-print(W0_accumiliation)
+
+fig, axs = plt.subplots(3, 2)
+counter = 0
+labels = [
+    "Subsonic SFC [1/hr]",
+    "Supersonic SFC [1/hr]",
+    "Subsonic Range [mi]",
+    "Supersonic Range [mi]",
+    "Maximum Lift-to-Drag Ratio",
+    "Endurance [hr]",
+]
+for row in [0, 1, 2]:
+    for col in [0, 1]:
+        param = parameters[counter]
+        x_vals = study_vals[param]
+        y_vals = W0_accumiliation[param]
+        axs[row, col].plot(x_vals, y_vals)
+        axs[row, col].set_xlabel(labels[counter])
+        axs[row, col].set_ylim([3000, 4000])
+        if col == 0:
+            axs[row, col].set_ylabel("Takeoff Weight [lbs]")
+        counter = counter + 1
+plt.show()
