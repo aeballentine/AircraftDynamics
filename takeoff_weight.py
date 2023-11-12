@@ -94,3 +94,17 @@ while error > 0.01:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # print the determined weight of the aircraft
 print("The empty weight is: ", np.round(weights_calc[-1], decimals=0), "lbs")
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~
+# step 4b airfoil selection
+AOA_cruise = 2 #degrees
+#rho_c = 0.0117 #density at 50k ft cruise in lbf/ft^3
+rho_c = 3.63*(10**-4) #density at 50kft cruise in slug/ft^3
+q_c = 0.5*rho_c*(V_c*5280*(1/3600))**2 #dynamic pressure with speed in ft/s
+b = 28 # wing span in ft
+c = 9 #chord length in ft
+S_wing = b*c
+AR_w = (b**2)/S_wing
+W_c = 3589
+Cl_req_cruise = (W_c/(q_c*S_wing))*(1+(2/AR_w))
+print("Cl required for cruise: ", Cl_req_cruise)
