@@ -28,7 +28,7 @@ def lift_coeff_estimate(W0):
     return C_L
 
 
-takeoff_weight = np.arange(3000, 7001, 10)
+takeoff_weight = np.arange(3000, 10001, 10)
 lift_coeff = []
 for weight in takeoff_weight:
     lift_coeff.append(lift_coeff_estimate(weight))
