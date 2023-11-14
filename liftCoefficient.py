@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import fsolve
 
 
 def lift_coeff_estimate(W0):
@@ -28,12 +29,44 @@ def lift_coeff_estimate(W0):
     return C_L
 
 
-takeoff_weight = np.arange(3000, 10001, 10)
-lift_coeff = []
-for weight in takeoff_weight:
-    lift_coeff.append(lift_coeff_estimate(weight))
+# takeoff_weight = np.arange(3000, 10001, 10)
+# lift_coeff = []
+# for weight in takeoff_weight:
+#     lift_coeff.append(lift_coeff_estimate(weight))
+#
+# plt.plot(takeoff_weight, lift_coeff)
+# plt.xlabel("Takeoff Weight [lbf]")
+# plt.ylabel("Required Lift Coefficient")
+# plt.show()
 
-plt.plot(takeoff_weight, lift_coeff)
-plt.xlabel("Takeoff Weight [lbf]")
-plt.ylabel("Required Lift Coefficient")
-plt.show()
+takeoff_weight = 9831
+lift_coeff = lift_coeff_estimate(takeoff_weight)
+print("The required lift coefficient is: ", lift_coeff)
+
+# calculate the Reynold's number
+V = 600 * 1.467  # cruise velocity in ft/s
+c = 9  # chord in feet
+nu = 2.969 * 10 ** (-7) / (3.64 * 10 ** (-4))
+Re = V * c / nu
+print("The Reynold's number is: ", Re)
+
+a = math.sqrt(1.4 * 1717 * 389.97)  # in ft/s
+M = V / a
+print("The Mach number is: ", M)
+
+
+def find_critical_Mach(guess):
+    gamma = 1.4
+    cp0 = -1
+    guess = guess[0]
+    error = (2 / (gamma * guess**2)) * (
+        ((1 + ((gamma - 2) / 2) * guess**2) / (1 + ((gamma - 1) / 2)))
+        ** (gamma / (gamma - 1))
+        - 1
+    ) - cp0 / math.sqrt(1 - guess**2)
+    return error
+
+
+critical_mach = fsolve(find_critical_Mach, np.array([0.9]))
+
+print("The critical Mach number is: ", critical_mach[0])
