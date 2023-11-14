@@ -7,15 +7,37 @@ from scipy.optimize import fsolve
 def lift_coeff_estimate(W0):
     # W0 is input in lbf
 
-    CL_est = 14  # dimensionless
+    AR_wetted = 1.4  # from text
+    K_LD = 14
+    L2D_max = K_LD * np.sqrt(AR_wetted)
+    # cruise lift to drag ratio
+    L2D_cruise = 0.866 * L2D_max
+    L2D_super = 0.5 * L2D_max
+
     SFC = 0.9  # in 1/hr
     Range = 1200  # in mi
     V_c = 600  # in mph
 
     # find the average weight during cruise
-    W_cruise_inital = 0.97 * 0.985 * W0
-    W_cruise_final = math.exp(-Range * SFC / (V_c * CL_est))
-    W_cruise = (W_cruise_final + W_cruise_inital) / 2
+    W_cruise_initial = 0.97 * 0.985 * W0
+    W_cruise_final = W_cruise_initial * math.exp(-Range * SFC / (V_c * L2D_cruise))
+    W_cruise = (W_cruise_final + W_cruise_initial) / 2
+
+    W_super_initial = W_cruise_final
+    R_super = 75  # in mi
+    SFC_super = 1.5  # in 1/hr
+    Temp_cruise = 390  # degrees R
+    M_super = 1.25  # Supersonic Mach No.
+    gamma = 1.4
+    gas_constant = 287  # J/kgK
+    V_super = (M_super * np.sqrt(gamma * gas_constant * (Temp_cruise * 0.556))) * 3.28
+    W_super_final = W_super_initial * math.exp(
+        -R_super * SFC_super / (V_super * L2D_super)
+    )
+
+    W_super = (W_super_initial + W_super_final) / 2
+    print(W_super)
+    print(W_cruise)
 
     # wing sizing
     bw = 28  # wing span in ft
@@ -26,7 +48,10 @@ def lift_coeff_estimate(W0):
     density = 3.64 * 10 ** (-4)  # density at 50,000 ft in slug/ft^3
     dynamicPress = 0.5 * density * V_c**2
     C_L = W_cruise * (1 + 2 / AR_wing) / (dynamicPress * S_wing)
-    return C_L
+
+    dynamicPress_super = 0.5 * density * V_super**2
+    C_L_super = W_super * (1 + 2 / AR_wing) / (dynamicPress_super * S_wing)
+    return [C_L, C_L_super]
 
 
 # takeoff_weight = np.arange(3000, 10001, 10)
@@ -41,7 +66,8 @@ def lift_coeff_estimate(W0):
 
 takeoff_weight = 9831
 lift_coeff = lift_coeff_estimate(takeoff_weight)
-print("The required lift coefficient is: ", lift_coeff)
+print("The required lift coefficient is: ", lift_coeff[0])
+print("The required supersonic lift coefficient is: ", lift_coeff[1])
 
 # calculate the Reynold's number
 V = 600 * 1.467  # cruise velocity in ft/s
@@ -52,7 +78,9 @@ print("The Reynold's number is: ", Re)
 
 a = math.sqrt(1.4 * 1717 * 389.97)  # in ft/s
 M = V / a
-print("The Mach number is: ", M)
+print("The subsonic Mach number is: ", M)
+
+print("The supersonic Mach number is: ", 1.25)
 
 
 def find_critical_Mach(guess):
