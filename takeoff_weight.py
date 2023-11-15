@@ -128,7 +128,7 @@ print("The empty weight is: ", np.round(W_calc[0], decimals=2), "lbs")
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # step 4b airfoil selection
 AOA_cruise = 2  # degrees
-# rho_c = 0.0117 #density at 50k ft cruise in lbf/ft^3
+# rho_c = 0.0117-0 #density at 50k ft cruise in lbf/ft^3
 rho_c = 3.63 * (10**-4)  # density at 50kft cruise in slug/ft^3
 q_c = (
     0.5 * rho_c * (V_c * 5280 * (1 / 3600)) ** 2
