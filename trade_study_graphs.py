@@ -1,7 +1,7 @@
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-
+from scipy.optimize import fsolve
 
 # TODO: check units for....basically everything
 # TODO: also, check equations and see what the proper equation for supersonic flight is...I just kinda guesseed
@@ -36,7 +36,7 @@ def takeoffWeight(SFC_subsonic, SFC_supersonic, R_subsonic, R_supersonic, L2D_ma
     Temp_cruise = 390  # degrees R
     M_super = 1.25  # Supersonic Mach No.
     gamma = 1.4
-    gas_constant = 287  # J/kgK
+    gas_constant = 1716  # lbf/slugR
     V_super = (M_super * np.sqrt(gamma * gas_constant * (Temp_cruise * 0.556))) * 3.28
     # converted temp to K, calculated m/s, multiplied by 3.28 to get
     L2D_super = 0.5 * L2D_max  # double check formula
@@ -71,24 +71,42 @@ def takeoffWeight(SFC_subsonic, SFC_supersonic, R_subsonic, R_supersonic, L2D_ma
     W_payload = 0
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # empty weight ratio
-    def weight_ratio(takeoff_weight):
-        A = 1.59
-        C = -0.10
-        empty_weight_ratio = A * takeoff_weight**C
-        return empty_weight_ratio
+    # empty weight ratio OLD CODE - Liz trying to fix it
+    #def weight_ratio(takeoff_weight):
+    #    A = 2.34
+    #    C = -0.13
+    #    empty_weight_ratio = A * takeoff_weight**C
+    #    return empty_weight_ratio
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    while error > 0.01:
-        W_new = (W_crew + W_payload) / (1 - fuel_fraction - weight_ratio(W_old))
-        error = np.abs(W_new - W_old)
-        weights_calc.append(W_new)
-        W_old = W_new
+    #while error > 0.01:
+    #    W_new = (W_crew + W_payload) / (1 - fuel_fraction - weight_ratio(W_old))
+    #    error = np.abs(W_new - W_old)
+    #    weights_calc.append(W_new)
+    #    W_old = W_new
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # return the final calculated weight
-    return weights_calc[-1]
+    #return weights_calc[-1]
 
+# new code added by Liz from intial weight code
+def weight_ratio(takeoff_weight):
+    A = 2.34  # jet fighter: 2.34  # jet trainer: 1.59
+    C = -0.13  # jet fighter: -0.13  # jet trainer: -0.10
+    empty_weight_ratio = A * takeoff_weight**C
+    return empty_weight_ratio
+
+
+def takeoff_weight(W_guess):
+    W_guess = W_guess[0]
+    if W_guess < 0:
+        err = 100
+    else:
+        W_new = (W_crew + W_payload) / (1 - fuel_fraction - weight_ratio(W_guess))
+        err = np.abs(W_new - W_guess)
+    return err
+W_calc = fsolve(takeoff_weight, np.array([W_guess]))
+print("The empty weight is: ", np.round(W_calc[0], decimals=2), "lbs")
 
 # basic_specs:
 parameters_dictionary = {
