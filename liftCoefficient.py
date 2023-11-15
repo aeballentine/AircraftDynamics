@@ -88,7 +88,7 @@ def find_critical_Mach(guess):
     cp0 = -0.7
     guess = guess[0]
     error = (2 / (gamma * guess**2)) * (
-        ((1 + ((gamma - 2) / 2) * guess**2) / (1 + ((gamma - 1) / 2)))
+        ((1 + ((gamma - 1) / 2) * guess**2) / (1 + ((gamma - 1) / 2)))
         ** (gamma / (gamma - 1))
         - 1
     ) - cp0 / math.sqrt(1 - guess**2)
