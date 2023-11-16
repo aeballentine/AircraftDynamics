@@ -86,12 +86,12 @@ print("The supersonic Mach number is: ", 1.25)
 def find_critical_Mach(guess):
     gamma = 1.4
     cp0 = -0.7
-    guess = guess[0]
-    error = (2 / (gamma * guess**2)) * (
-        ((1 + ((gamma - 1) / 2) * guess**2) / (1 + ((gamma - 1) / 2)))
+    m_crit = guess[0]
+    error = (2 / (gamma * m_crit**2)) * (
+        ((1 + ((gamma - 1) / 2) * m_crit**2) / (1 + ((gamma - 1) / 2)))
         ** (gamma / (gamma - 1))
         - 1
-    ) - cp0 / math.sqrt(1 - guess**2)
+    ) - cp0 / math.sqrt(1 - m_crit**2)
     return error
 
 

@@ -31,7 +31,7 @@ L2D_cruise = 0.866 * L2D_max
 L2D_loiter = L2D_max
 
 # COMBAT
-Com = 3 / 2  # in hr
+Com = 1.25  # in hr
 
 # ENDURANCE
 E = 1 / 2  # in hr
@@ -50,7 +50,7 @@ gamma = 1.4
 gas_constant = 287  # J/kgK
 V_super = (M_super * np.sqrt(gamma * gas_constant * (Temp_cruise * 0.556))) * 3.28
 # converted temp to K, calculated m/s, multiplied by 3.28 to get
-L2D_super = 0.5 * L2D_max  # double check formula
+L2D_super = L2D_max  # double check formula
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # fuel fraction:
@@ -69,7 +69,7 @@ frac_loiter = math.exp(-E * SFC / L2D_max)
 # landing
 frac_landing = 0.995
 
-fuel_fraction = (
+fuel_fraction = 1.06 * (
     1
     - frac_taxi
     * frac_climb
@@ -79,6 +79,7 @@ fuel_fraction = (
     * frac_loiter
     * frac_landing
 )
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # crew and payload weight
@@ -95,22 +96,29 @@ def weight_ratio(W0):
     return empty_weight_ratio
 
 
-def takeoff_weight(W0_guess):
-    W0_guess = W0_guess[0]
-    if W0_guess < 0:
-        err = 100
-    else:
-        W_new = (W_crew + W_payload) / (1 - fuel_fraction - weight_ratio(W0_guess))
-        err = np.abs(W_new - W0_guess)
-    return err
+class IterationTable:
+    def __init__(self):
+        self.list = []
+
+    def takeoff_weight(self, W0_guess):
+        W0_guess = W0_guess[0]
+        self.list.append(W0_guess)
+        if W0_guess < 0:
+            err = 100
+        else:
+            W_new = (W_crew + W_payload) / (1 - fuel_fraction - weight_ratio(W0_guess))
+            err = np.abs(W_new - W0_guess)
+        return err
 
 
 # using fsolve here since the while loop is having a really hard time converging:
 # I tried to run it with everything added in to the code. Basically, it keeps getting negative numbers
 # this isn't TOO big of a problem, but it proceeds to make EVERYTHING else imaginary
 # ...there is a solution, but it basically entails a REALLY good initial guess, which is way too much effort
-W_calc = fsolve(takeoff_weight, np.array([W_guess]))
+iterations = IterationTable()
+W_calc = fsolve(iterations.takeoff_weight, np.array([W_guess]))
 print("The empty weight is: ", np.round(W_calc[0], decimals=2), "lbs")
+print(iterations.list)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # OLD CODE (***THIS DOES NOT CONVERGE***)
@@ -126,17 +134,17 @@ print("The empty weight is: ", np.round(W_calc[0], decimals=2), "lbs")
 # print("The empty weight is: ", np.round(weights_calc[-1], decimals=0), "lbs")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-# step 4b airfoil selection
-AOA_cruise = 2  # degrees
-# rho_c = 0.0117-0 #density at 50k ft cruise in lbf/ft^3
-rho_c = 3.63 * (10**-4)  # density at 50kft cruise in slug/ft^3
-q_c = (
-    0.5 * rho_c * (V_c * 5280 * (1 / 3600)) ** 2
-)  # dynamic pressure with speed in ft/s
-b = 28  # wing span in ft
-c = 9  # chord length in ft
-S_wing = b * c
-AR_w = (b**2) / S_wing
-W_c = 3589
-Cl_req_cruise = (W_c / (q_c * S_wing)) * (1 + (2 / AR_w))
-print("Cl required for cruise: ", Cl_req_cruise)
+# # step 4b airfoil selection
+# AOA_cruise = 2  # degrees
+# # rho_c = 0.0117-0 #density at 50k ft cruise in lbf/ft^3
+# rho_c = 3.63 * (10**-4)  # density at 50kft cruise in slug/ft^3
+# q_c = (
+#     0.5 * rho_c * (V_c * 5280 * (1 / 3600)) ** 2
+# )  # dynamic pressure with speed in ft/s
+# b = 28  # wing span in ft
+# c = 9  # chord length in ft
+# S_wing = b * c
+# AR_w = (b**2) / S_wing
+# W_c = 3589
+# Cl_req_cruise = (W_c / (q_c * S_wing)) * (1 + (2 / AR_w))
+# print("Cl required for cruise: ", Cl_req_cruise)

@@ -3,6 +3,7 @@ import math
 import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
 
+
 # TODO: check units for....basically everything
 # TODO: also, check equations and see what the proper equation for supersonic flight is...I just kinda guesseed
 def takeoffWeight(SFC_subsonic, SFC_supersonic, R_subsonic, R_supersonic, L2D_max, E):
@@ -39,7 +40,10 @@ def takeoffWeight(SFC_subsonic, SFC_supersonic, R_subsonic, R_supersonic, L2D_ma
     gas_constant = 1716  # lbf/slugR
     V_super = (M_super * np.sqrt(gamma * gas_constant * (Temp_cruise * 0.556))) * 3.28
     # converted temp to K, calculated m/s, multiplied by 3.28 to get
-    L2D_super = 0.5 * L2D_max  # double check formula
+    L2D_super = L2D_max  # double check formula
+
+    # COMBAT
+    Com = 1.25  # in hr
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fuel fraction:
@@ -51,8 +55,10 @@ def takeoffWeight(SFC_subsonic, SFC_supersonic, R_subsonic, R_supersonic, L2D_ma
     frac_subsonic = math.exp(-R_subsonic * SFC_subsonic / (V_c * L2D_cruise))
     # supersonic cruise
     frac_supersonic = math.exp(-R_supersonic * SFC_supersonic / (V_super * L2D_super))
+    # combat
+    frac_combat = math.exp(-Com * SFC_subsonic / L2D_max)
     # loiter
-    frac_loiter = math.exp(-E * SFC_subsonic / L2D_max)
+    frac_loiter = math.exp(-E * SFC_subsonic / L2D_loiter)
     # landing
     frac_landing = 0.995
     fuel_fraction = (
@@ -61,6 +67,7 @@ def takeoffWeight(SFC_subsonic, SFC_supersonic, R_subsonic, R_supersonic, L2D_ma
         * frac_climb
         * frac_subsonic
         * frac_supersonic
+        * frac_combat
         * frac_loiter
         * frac_landing
     )
@@ -72,14 +79,14 @@ def takeoffWeight(SFC_subsonic, SFC_supersonic, R_subsonic, R_supersonic, L2D_ma
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # empty weight ratio OLD CODE - Liz trying to fix it
-    #def weight_ratio(takeoff_weight):
+    # def weight_ratio(takeoff_weight):
     #    A = 2.34
     #    C = -0.13
     #    empty_weight_ratio = A * takeoff_weight**C
     #    return empty_weight_ratio
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #while error > 0.01:
+    # while error > 0.01:
     #    W_new = (W_crew + W_payload) / (1 - fuel_fraction - weight_ratio(W_old))
     #    error = np.abs(W_new - W_old)
     #    weights_calc.append(W_new)
@@ -87,7 +94,8 @@ def takeoffWeight(SFC_subsonic, SFC_supersonic, R_subsonic, R_supersonic, L2D_ma
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # return the final calculated weight
-    #return weights_calc[-1]
+    # return weights_calc[-1]
+
 
 # new code added by Liz from intial weight code
 def weight_ratio(takeoff_weight):
@@ -105,6 +113,8 @@ def takeoff_weight(W_guess):
         W_new = (W_crew + W_payload) / (1 - fuel_fraction - weight_ratio(W_guess))
         err = np.abs(W_new - W_guess)
     return err
+
+
 W_calc = fsolve(takeoff_weight, np.array([W_guess]))
 print("The empty weight is: ", np.round(W_calc[0], decimals=2), "lbs")
 
