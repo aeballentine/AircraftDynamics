@@ -102,7 +102,7 @@ class IterationTable:
 
     def takeoff_weight(self, W0_guess):
         W0_guess = W0_guess[0]
-        self.list.append(W0_guess)
+        self.list.append(np.round(W0_guess, decimals=2))
         if W0_guess < 0:
             err = 100
         else:
