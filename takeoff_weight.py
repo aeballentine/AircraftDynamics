@@ -47,7 +47,7 @@ ceiling = 55000  # ft
 Temp_cruise = 390  # degrees R
 M_super = 1.25  # Supersonic Mach No.
 gamma = 1.4
-gas_constant = 287  # J/kgK
+gas_constant = 1716  # lbf/slugR
 V_super = (M_super * np.sqrt(gamma * gas_constant * (Temp_cruise * 0.556))) * 3.28
 # converted temp to K, calculated m/s, multiplied by 3.28 to get
 L2D_super = L2D_max  # double check formula

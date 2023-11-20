@@ -36,8 +36,6 @@ def lift_coeff_estimate(W0):
     )
 
     W_super = (W_super_initial + W_super_final) / 2
-    print(W_super)
-    print(W_cruise)
 
     # wing sizing
     bw = 28  # wing span in ft
@@ -72,7 +70,8 @@ print("The required supersonic lift coefficient is: ", lift_coeff[1])
 # calculate the Reynold's number
 V = 600 * 1.467  # cruise velocity in ft/s
 c = 9  # chord in feet
-nu = 2.969 * 10 ** (-7) / (3.64 * 10 ** (-4))
+# at 50,000 ft: nu = 2.969 * 10 ** (-7) / (3.64 * 10 ** (-4))
+nu = 2.969 * 10 ** (-7) / (4.62 * 10 ** (-4))
 Re = V * c / nu
 print("The Reynold's number is: ", Re)
 
@@ -85,7 +84,7 @@ print("The supersonic Mach number is: ", 1.25)
 
 def find_critical_Mach(guess):
     gamma = 1.4
-    cp0 = -0.7
+    cp0 = -1
     m_crit = guess[0]
     error = (2 / (gamma * m_crit**2)) * (
         ((1 + ((gamma - 1) / 2) * m_crit**2) / (1 + ((gamma - 1) / 2)))
@@ -95,9 +94,9 @@ def find_critical_Mach(guess):
     return error
 
 
-critical_mach = fsolve(find_critical_Mach, np.array([0.9]))
+critical_mach = fsolve(find_critical_Mach, np.array([0.99999]))
 
 print("The critical Mach number is: ", critical_mach[0])
 
-leading_angle = math.acos(critical_mach[0] / 1.25)
+leading_angle = math.acos(critical_mach[0] / 0.909)
 print("The sweep angle is: ", leading_angle * 180 / math.pi, "deg")
