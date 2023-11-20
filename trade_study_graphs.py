@@ -2,8 +2,6 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
-import plotly.express as px
-import pandas as pd
 
 
 def takeoffWeight(SFC_subsonic, SFC_supersonic, R_subsonic, R_supersonic, L2D_max, E):
