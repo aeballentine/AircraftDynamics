@@ -99,7 +99,7 @@ parameters_dictionary = {
     "R_subsonic": 1200,
     "SFC_supersonic": 1.5,
     "R_supersonic": 75,
-    "L2D_max": 16.6,
+    "L2D_max": 16.565,
     "E": 1 / 2,
 }
 W0_accumiliation = {
@@ -163,22 +163,22 @@ labels = [
 colors = ["tab:blue", "tab:blue", "tab:red", "tab:red", "tab:purple", "tab:purple"]
 ylims = [
     [6500, 10200],
-    [6500, 10200],
-    [9550, 9650],
-    [9550, 9650],
+    [7500, 10200],
+    [9590, 9680],
+    [9590, 9680],
     [7000, 10200],
-    [9200, 10100],
+    [9100, 10200],
 ]
 for row in [0, 1, 2]:
     for col in [0, 1]:
         param = parameters[counter]
         x_vals = study_vals[param]
         y_vals = W0_accumiliation[param]
-        axs[row, col].plot(x_vals, y_vals, color=colors[counter])
-        axs[row, col].set_xlabel(labels[counter])
-        axs[row, col].vlines(
-            parameters_dictionary[param], 0, 20000, color="black", linestyle="--"
+        axs[row, col].scatter(x_vals, y_vals, color=colors[counter], s=2)
+        axs[row, col].scatter(
+            parameters_dictionary[param], 9635, color="black", facecolor="none"
         )
+        axs[row, col].set_xlabel(labels[counter])
         axs[row, col].set_ylabel("Takeoff Weight [lbs]")
         axs[row, col].set_ylim(ylims[counter])
         counter = counter + 1
