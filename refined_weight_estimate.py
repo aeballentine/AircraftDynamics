@@ -43,7 +43,7 @@ Temp_cruise = 390  # degrees R
 M_super = 1.25  # supersonic Mach No.
 gamma = 1.4
 gas_constant = 1716  # ft-lbf/slug-R
-V_super = (M_super * np.sqrt(gamma * gas_constant * Temp_cruise))   # in ft/s
+V_super = M_super * np.sqrt(gamma * gas_constant * Temp_cruise)  # in ft/s
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # fuel fraction:
