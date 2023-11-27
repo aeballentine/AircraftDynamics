@@ -30,10 +30,9 @@ def takeoffWeight(SFC_subsonic, SFC_supersonic, R_subsonic, R_supersonic, L2D_ma
     Temp_cruise = 390  # degrees R
     M_super = 1.25  # Supersonic Mach No.
     gamma = 1.4
-    gas_constant = 1716  # lbf/slugR
-    V_super = (M_super * np.sqrt(gamma * gas_constant * (Temp_cruise * 0.556))) * 3.28
-    # converted temp to K, calculated m/s, multiplied by 3.28 to get
-    L2D_super = L2D_max  # double check formula
+    gas_constant = 1716  # ft-lbf/slug-R
+    V_super = M_super * np.sqrt(gamma * gas_constant * Temp_cruise)
+    L2D_super = L2D_max
 
     # COMBAT
     Com = 1.25  # in hr
@@ -162,12 +161,12 @@ labels = [
 ]
 colors = ["tab:blue", "tab:blue", "tab:red", "tab:red", "tab:purple", "tab:purple"]
 ylims = [
-    [6500, 10200],
-    [7500, 10200],
-    [9590, 9680],
-    [9590, 9680],
     [7000, 10200],
-    [9100, 10200],
+    [8000, 10200],
+    [9700, 10000],
+    [9700, 10000],
+    [7000, 10200],
+    [9200, 10200],
 ]
 for row in [0, 1, 2]:
     for col in [0, 1]:
@@ -176,7 +175,7 @@ for row in [0, 1, 2]:
         y_vals = W0_accumiliation[param]
         axs[row, col].scatter(x_vals, y_vals, color=colors[counter], s=2)
         axs[row, col].scatter(
-            parameters_dictionary[param], 9635, color="black", facecolor="none"
+            parameters_dictionary[param], 9838, color="black", facecolor="none"
         )
         axs[row, col].set_xlabel(labels[counter])
         axs[row, col].set_ylabel("Takeoff Weight [lbs]")
