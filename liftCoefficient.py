@@ -29,8 +29,8 @@ def lift_coeff_estimate(W0):
     Temp_cruise = 390  # degrees R
     M_super = 1.25  # Supersonic Mach No.
     gamma = 1.4
-    gas_constant = 287  # J/kgK
-    V_super = (M_super * np.sqrt(gamma * gas_constant * (Temp_cruise * 0.556))) * 3.28
+    gas_constant = 1716  # ft-lbf/slug-R
+    V_super = M_super * np.sqrt(gamma * gas_constant * Temp_cruise)  # in ft/s
     W_super_final = W_super_initial * math.exp(
         -R_super * SFC_super / (V_super * L2D_super)
     )
@@ -62,7 +62,7 @@ def lift_coeff_estimate(W0):
 # plt.ylabel("Required Lift Coefficient")
 # plt.show()
 
-takeoff_weight = 9831
+takeoff_weight = 9839
 lift_coeff = lift_coeff_estimate(takeoff_weight)
 print("The required lift coefficient is: ", lift_coeff[0])
 print("The required supersonic lift coefficient is: ", lift_coeff[1])
