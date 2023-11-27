@@ -51,3 +51,14 @@ def wing_loading(W0)
     print(wing_loading_landing)
     
     #TAKEOFF
+    #density_airport = density_SL #need to change? 
+    #TOP =
+    #sigma = density_airport / density_SL
+    #C_LTO = C_Lmax
+    #M_max = 1.25
+    #t_to_w_to = 0.488*M_max**0.728 #table 5.3
+    #wing_loading_TO = TOP*sigma*C_LTO*t_to_w_to
+    #print(wing_loading_TO)
+
+    return [wing_loading_cruise,wing_loading_loiter,wing_loading_landing,wing_loading_TO]
+
