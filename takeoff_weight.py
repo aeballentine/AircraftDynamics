@@ -119,6 +119,8 @@ iterations = IterationTable()
 W_calc = fsolve(iterations.takeoff_weight, np.array([W_guess]))
 print("The empty weight is: ", np.round(W_calc[0], decimals=2), "lbs")
 print(iterations.list)
+empty_weight = weight_ratio(W_calc[0]) * W_calc[0]
+print("The empty weight is: ", np.round(empty_weight, decimals=2), "lbs")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # OLD CODE (***THIS DOES NOT CONVERGE***)
