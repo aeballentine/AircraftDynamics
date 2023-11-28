@@ -58,8 +58,7 @@ def wing_loading(W0):
     M_max = 1.25
     t_to_w_to = 0.488*M_max**0.728 #table 5.3
     wing_loading_TO = TOP*sigma*C_LTO*t_to_w_to
-    #print('Wing loading at cruise: ' % wing_loading_cruise)
-    #print('Wing loading at loiter: ' % wing_loading_loiter)
-    #print('Wing loading at landing: ' % wing_loading_landing)
-    #print('Wing loading at takeoff: ' % wing_loading_TO) 
-    return [wing_loading_cruise, wing_loading_loiter, wing_loading_landing, wing_loading_TO]
+    print('Wing loading at cruise: ' wing_loading_cruise)
+    print('Wing loading at loiter: ' wing_loading_loiter)
+    print('Wing loading at landing: ' wing_loading_landing)
+    print('Wing loading at takeoff: ' wing_loading_TO) 
