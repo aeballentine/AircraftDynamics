@@ -7,7 +7,9 @@ from scipy.optimize import fsolve
 # on airfoil selection, etc. 
 
 def wing_loading(W0):
-    #CRUISE
+    
+    #WING LOADING - CRUISE
+    
     #dynamic pressure at cruise
     V_cruise = 600 #mph
     density_cruise = 3.64 * 10 ** (-4)  # density at 50,000 ft in slug/ft^3
@@ -22,7 +24,7 @@ def wing_loading(W0):
     K_LD = 14
     L2D_max = K_LD * np.sqrt(AR_wetted)
     L2D_cruise = 0.866 * L2D_max
-    #weight at cruise
+    #wing loading at cruise
     R = 1200 #subsonic range in mi
     SFC = 0.9 #subsonic specific fuel consumption 1/hr
     W_cruise_initial = 0.97*0.985*W0
@@ -31,25 +33,38 @@ def wing_loading(W0):
     C_L = W_cruise * (1 + 2 / AR_w) / (q_c * S_w)
     C_D0 = 0.015
     wing_loading_cruise = q_c*math.sqrt((C_D0*math.pi*AR_w*e_0)/3)
+    
+    #Refined wing area at cruise
+    Sw_cruise = W_cruise / wing_loading_cruise
 
-    #LOITER
+    #WING LOADING - LOITER
+    
     #dynamic pressure at loiter
     V_loiter = 287 #speed in ft/s, =170 knots since
                     #should be 150-200 knots - FIX? 
     density_loiter = 5.87*10**(-4) #density at 40kft FIX - FIND LOITER ALT
     q_l = 0.5*density_loiter*V_loiter**2
     wing_loading_loiter = q_l*math.sqrt(C_D0*math.pi*AR_w*e_0)
+    
+    #Refined wing area at loiter
+    W_loiter = W_cruise
+    Sw_loiter = W_loiter / wing_loading_loiter
 
-    #LANDING
+    #WING LOADING - LANDING
+    
     #dynamic pressure at landing
     density_SL = 0.00238 #density at SL in slug/ft^3
     V_stall = 214.133 #check - given as stall speed in specs
     q_landing = 0.5*density_SL*V_stall**2
-    #calculate wing loading at landing with C_Lmax
     C_Lmax = 2 #FIX for airfoil selection
     wing_loading_landing = C_Lmax*S_w*q_landing
     
-    #TAKEOFF
+    #Refined wing area at landing
+    W_landing = C_Lmax*q_landing
+    Sw_landing = W_landing / wing_loading_landing
+    
+    #WING LOADING - TAKEOFF
+    
     density_airport = density_SL #need to change?
     S_g = 2500 #takeoff dist in ft based on baseline aircraft
     TOP = 160 #based on S_g and Fig. 5.4
@@ -58,7 +73,20 @@ def wing_loading(W0):
     M_max = 1.25
     t_to_w_to = 0.488*M_max**0.728 #table 5.3
     wing_loading_TO = TOP*sigma*C_LTO*t_to_w_to
-    print('Wing loading at cruise: ' wing_loading_cruise)
-    print('Wing loading at loiter: ' wing_loading_loiter)
-    print('Wing loading at landing: ' wing_loading_landing)
-    print('Wing loading at takeoff: ' wing_loading_TO) 
+    
+    #Refined wing area at takeoff
+    W_TO = 9838 # new takeoff weight?
+    Sw_TO = W_TO / wing_loading_TO
+
+    #Display wing loadings
+    print('Wing loading at cruise: ', wing_loading_cruise)
+    print('Wing loading at loiter: ', wing_loading_loiter)
+    print('Wing loading at landing: ', wing_loading_landing)
+    print('Wing loading at takeoff: ', wing_loading_TO) 
+
+    #REFINED WING AREA
+    Sw_refined = max(Sw_cruise, Sw_loiter, Sw_landing, Sw_TO)
+    print('Refined wing area in ft^2: ', Sw_refined)
+
+    #THRUST-WEIGHT RATIO - CRUISE
+    thrust_weight_cruise = ((q_c*C_D0)/(W_cruise/Sw_refined))+((W_cruise/Sw_refined)/(math.pi*AR_w*e_0*q_c))
