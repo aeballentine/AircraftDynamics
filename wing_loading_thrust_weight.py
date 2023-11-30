@@ -42,7 +42,9 @@ def wing_loading(W0):
     #dynamic pressure at loiter
     V_loiter = 287 #speed in ft/s, =170 knots since
                     #should be 150-200 knots - FIX? 
-    density_loiter = 5.87*10**(-4) #density at 40kft FIX - FIND LOITER ALT
+    #density_loiter = 5.87*10**(-4) #density at 40kft FIX - FIND LOITER ALT
+
+    density_loiter = 3.64 * 10 ** (-4)
     q_l = 0.5*density_loiter*V_loiter**2
     wing_loading_loiter = q_l*math.sqrt(C_D0*math.pi*AR_w*e_0)
     
@@ -56,7 +58,7 @@ def wing_loading(W0):
     density_SL = 0.00238 #density at SL in slug/ft^3
     V_stall = 214.133 #check - given as stall speed in specs
     q_landing = 0.5*density_SL*V_stall**2
-    C_Lmax = 2 #FIX for airfoil selection
+    C_Lmax = 2.2 #Maximum CL for SC(2)-0714
     wing_loading_landing = C_Lmax*S_w*q_landing
     
     #Refined wing area at landing
@@ -71,8 +73,8 @@ def wing_loading(W0):
     sigma = density_airport / density_SL
     C_LTO = C_Lmax
     M_max = 1.25
-    t_to_w_to = 0.488*M_max**0.728 #table 5.3
-    wing_loading_TO = TOP*sigma*C_LTO*t_to_w_to
+    thrust_weight_TO = 0.488*M_max**0.728 #table 5.3
+    wing_loading_TO = TOP*sigma*C_LTO*thrust_weight_TO
     
     #Refined wing area at takeoff
     W_TO = 9838 # new takeoff weight?
@@ -89,4 +91,25 @@ def wing_loading(W0):
     print('Refined wing area in ft^2: ', Sw_refined)
 
     #THRUST-WEIGHT RATIO - CRUISE
-    thrust_weight_cruise = ((q_c*C_D0)/(W_cruise/Sw_refined))+((W_cruise/Sw_refined)/(math.pi*AR_w*e_0*q_c))
+    thrust_weight_cruise = ((q_c*C_D0)/wing_loading_cruise)+(wing_loading_cruise/(math.pi*AR_w*e_0*q_c))
+    print('Thrust-to-weight ratio at cruise: ', thrust_weight_cruise)
+    thrust_cruise = thrust_weight_cruise * W_cruise
+    print('Thrust at cruise: ', thrust_cruise)
+
+    #THRUST-WEIGHT RATIO - LOITER
+    thrust_weight_loiter = ((q_l*C_D0)/wing_loading_loiter)+(wing_loading_loiter/(math.pi*q_l*AR_w*e_0))
+                                        #Note: should this be based on wing loading just calculated?
+    print('Thrust-to-weight ratio at loiter: ', thrust_weight_loiter)
+    thrust_loiter = thrust_weight_loiter * W_loiter
+    print('Thrust at loiter: ', thrust_loiter)
+
+    #THRUST-WEIGHT RATIO - TAKEOFF
+    thrust_TO = thrust_weight_TO * W_TO
+    print('Thrust-to-weight ratio at takeoff: ', thrust_weight_TO)
+    print('Thrust at takeoff: ', thrust_TO)
+
+    #THRUST-WEIGHT RATIO - LANDING
+    thrust_weight_landing = ((q_landing*C_D0)/wing_loading_landing)+(wing_loading_landing/(math.pi*q_landing*AR_w*e_0))
+    thrust_landing = thrust_weight_landing * W_landing
+    print('Thrust-to-weight ratio at landing: ', thrust_weight_landing)
+    print('Thrust at landing: ', thrust_landing)
