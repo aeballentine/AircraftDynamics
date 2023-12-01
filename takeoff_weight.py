@@ -118,6 +118,32 @@ print(iterations.list)
 empty_weight = weight_ratio(W_calc[0]) * W_calc[0]
 print("The empty weight is: ", np.round(empty_weight, decimals=2), "lbs")
 
+initial_weight = W_calc[0]
+W_climb = W_calc[0] * frac_taxi
+W_cruise = W_climb * frac_climb
+W_supersonic = W_cruise * frac_subsonic
+W_combat = W_supersonic * frac_supersonic
+W_loiter = W_combat * frac_combat
+W_landing = W_loiter * frac_loiter
+W_final = W_landing * frac_landing
+
+print("The heaviest weight during climb is: ", np.round(W_climb, decimals=2), " lbs")
+print("The heaviest weight during cruise is: ", np.round(W_cruise, decimals=2), " lbs")
+print(
+    "The heaviest weight during supersonic cruise is: ",
+    np.round(W_supersonic, decimals=2),
+    " lbs",
+)
+print("The heaviest weight during combat is: ", np.round(W_combat, decimals=2), " lbs")
+print("The heaviest weight during loiter is: ", np.round(W_loiter, decimals=2), " lbs")
+print(
+    "The heaviest weight during landing is: ", np.round(W_landing, decimals=2), " lbs"
+)
+
+
+print(W_calc[0] * (1 - fuel_fraction))
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # OLD CODE (***THIS DOES NOT CONVERGE***)
 # while error > 0.01:
