@@ -45,7 +45,7 @@ Temp_cruise = 390  # degrees R
 M_super = 1.25  # Supersonic Mach No.
 gamma = 1.4
 gas_constant = 1716  # ft-lbf/slug-R
-V_super = M_super * np.sqrt(gamma * gas_constant * Temp_cruise)  # in ft/s
+V_super = M_super * np.sqrt(gamma * gas_constant * Temp_cruise) * 0.682  # in mph
 L2D_super = L2D_max  # double check formula
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~

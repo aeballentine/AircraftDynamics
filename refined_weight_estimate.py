@@ -20,10 +20,10 @@ SFC = 0.9  # 1/hr
 # subsonic cruise velocity
 V_c = 600  # mph
 # lift to drag ratios:
-L2D_sub = None
-L2D_super = None
-L2D_loiter = None
-L2D_combat = None
+L2D_sub = 0.101 ** (-1)
+L2D_super = 0.53 ** (-1)
+L2D_loiter = 0.088 ** (-1)
+L2D_combat = 0.53 ** (-1)
 
 # COMBAT
 Com = 1.25  # in hr
@@ -43,7 +43,7 @@ Temp_cruise = 390  # degrees R
 M_super = 1.25  # supersonic Mach No.
 gamma = 1.4
 gas_constant = 1716  # ft-lbf/slug-R
-V_super = M_super * np.sqrt(gamma * gas_constant * Temp_cruise)  # in ft/s
+V_super = M_super * np.sqrt(gamma * gas_constant * Temp_cruise) * 0.682  # in mph
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # fuel fraction:
@@ -72,6 +72,7 @@ fuel_fraction = 1.06 * (
     * frac_loiter
     * frac_landing
 )
+print(fuel_fraction)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -94,6 +95,7 @@ def weight_ratio(W0, AR, T2W0, W02S, M_max):
     empty_weight_ratio = (
         a + b * W0**C1 * AR**C2 * T2W0**C3 * W02S**C4 * M_max**C5
     ) * k_vs
+    print(empty_weight_ratio)
     return empty_weight_ratio
 
 
@@ -107,10 +109,10 @@ class IterationTable:
         if W0_guess < 0:
             err = 100
         else:
-            M_max = 1.25
-            T2W = None
-            AR = None
-            W2S = None
+            M_max = 0.909
+            T2W = 0.574  # max thrust to weight
+            AR = 6.5
+            W2S = 29
             W_new = (W_crew + W_payload) / (
                 1 - fuel_fraction - weight_ratio(W0_guess, AR, T2W, W2S, M_max)
             )
@@ -122,5 +124,5 @@ iterations = IterationTable()
 W_calc = fsolve(iterations.takeoff_weight, np.array([W_guess]))
 print("The empty weight is: ", np.round(W_calc[0], decimals=2), "lbs")
 print(iterations.list)
-empty_weight = weight_ratio(W_calc[0]) * W_calc[0]
-print("The empty weight is: ", np.round(empty_weight, decimals=2), "lbs")
+# empty_weight = weight_ratio(W_calc[0]) * W_calc[0]
+# print("The empty weight is: ", np.round(empty_weight, decimals=2), "lbs")

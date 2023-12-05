@@ -13,6 +13,7 @@ def wing_loading(W0):
     # dynamic pressure at cruise
     V_cruise = 880  # ft/s
     density_cruise = 3.64 * 10 ** (-4)  # density at 50,000 ft in slug/ft^3
+    density_cruise = 5.87 * 10 ** (-4)
     q_c = 0.5 * density_cruise * V_cruise**2
     e_0 = 0.8  # typically between 0.7 and 0.85
     # wing dimensions
@@ -39,7 +40,7 @@ def wing_loading(W0):
 
     # dynamic pressure at loiter
     V_loiter = 338  # speed in ft/s, =200 knots
-    density_loiter = 5.87*10**(-4) #density at 40kft 
+    density_loiter = 5.87 * 10 ** (-4)  # density at 40kft
     q_l = 0.5 * density_loiter * V_loiter**2
     wing_loading_loiter_uncorr = q_l * math.sqrt(C_D0 * math.pi * AR_w * e_0)
     W_loiter = 7704  # in lbs
@@ -51,7 +52,7 @@ def wing_loading(W0):
     W_landing = 7317  # in lbf
     V_stall = math.sqrt(2 * W_landing / (density_SL * S_w * C_Lmax))
     q_landing = 0.5 * density_SL * V_stall**2
-    wing_loading_landing_uncorr = C_Lmax * S_w * q_landing
+    wing_loading_landing_uncorr = C_Lmax * q_landing
     W_landing = 7497  # in lbs
 
     # WING LOADING - TAKEOFF
@@ -72,37 +73,46 @@ def wing_loading(W0):
     gamma = 1.4
     gas_constant = 1716  # ft-lbf/slug-R
     V_super = M_super * np.sqrt(gamma * gas_constant * temp_cruise)  # in ft/s
-    q_super = 0.5*density_cruise*(V_super)**2
-    wing_loading_supersonic_uncorr = q_super * math.sqrt((C_D0 * math.pi * AR_w * e_0) / 3)
+    q_super = 0.5 * density_cruise * (V_super) ** 2
+    wing_loading_supersonic_uncorr = q_super * math.sqrt(
+        (C_D0 * math.pi * AR_w * e_0) / 3
+    )
 
     # Supersonic details
     R_super = 396000  # ft
-    SFC_super = 1.5/3600  # in 1/sec
+    SFC_super = 1.5 / 3600  # in 1/sec
     W_super_initial = W_cruise_final
-    W_super_final = W_super_initial * math.exp(-R_super * SFC_super / (V_super * L2D_super))
+    W_super_final = W_super_initial * math.exp(
+        -R_super * SFC_super / (V_super * L2D_super)
+    )
     W_super = (W_super_initial + W_super_final) / 2
 
     # CORRECTED WING LOADINGS
-    wing_loading_cruise_corr = wing_loading_cruise_uncorr * (W0/W_cruise)
-    wing_loading_loiter_corr = wing_loading_loiter_uncorr * (W0/W_loiter)
-    wing_loading_landing_corr = wing_loading_landing_uncorr * (W0/W_landing)
+    wing_loading_cruise_corr = wing_loading_cruise_uncorr * (W0 / W_cruise)
+    wing_loading_loiter_corr = wing_loading_loiter_uncorr * (W0 / W_loiter)
+    wing_loading_landing_corr = wing_loading_landing_uncorr * (W0 / W_landing)
     wing_loading_TO_corr = wing_loading_TO_uncorr
-    wing_loading_supersonic_corr = wing_loading_supersonic_uncorr * (W0/W_super)                                                     
-                                                    
+    wing_loading_supersonic_corr = wing_loading_supersonic_uncorr * (W0 / W_super)
 
     # Display uncorrected wing loadings
-    print("Uncorrected wing loading at cruise: ", wing_loading_cruise_uncorr, 'lb/ft^2')
-    print('Uncorrected wing loading at loiter: ', wing_loading_loiter_uncorr, 'lb/ft^2')
-    print('Uncorrected wing loading at landing: ', wing_loading_landing_uncorr, 'lb/ft^2')
-    print('Uncorrected wing loading at takeoff: ', wing_loading_TO_uncorr, 'lb/ft^2')
-    print('Uncorrected wing loading at combat: ', wing_loading_supersonic_uncorr, 'lb/ft^2')
-    
+    print("Uncorrected wing loading at cruise: ", wing_loading_cruise_uncorr, "lb/ft^2")
+    print("Uncorrected wing loading at loiter: ", wing_loading_loiter_uncorr, "lb/ft^2")
+    print(
+        "Uncorrected wing loading at landing: ", wing_loading_landing_uncorr, "lb/ft^2"
+    )
+    print("Uncorrected wing loading at takeoff: ", wing_loading_TO_uncorr, "lb/ft^2")
+    print(
+        "Uncorrected wing loading at combat: ",
+        wing_loading_supersonic_uncorr,
+        "lb/ft^2",
+    )
+
     # Display corrected wing loadings
     print("Corrected wing loading at cruise: ", wing_loading_cruise_corr, "lb/ft^2")
     print("Corrected wing loading at loiter: ", wing_loading_loiter_corr, "lb/ft^2")
     print("Corrected wing loading at landing: ", wing_loading_landing_corr, "lb/ft^2")
     print("Corrected wing loading at takeoff: ", wing_loading_TO_corr, "lb/ft^2")
-    print('Corrected wing loading at combat: ', wing_loading_supersonic_corr, 'lb/ft^2')
+    print("Corrected wing loading at combat: ", wing_loading_supersonic_corr, "lb/ft^2")
 
     # REFINED WING AREA
     Sw_TO = W_TO / wing_loading_TO_corr
@@ -110,7 +120,7 @@ def wing_loading(W0):
     Sw_landing = W_landing / wing_loading_landing_corr
     Sw_loiter = W_loiter / wing_loading_loiter_corr
     print("List of new wing areas: ", Sw_TO, Sw_cruise, Sw_landing, Sw_loiter)
-    Sw_refined = max(Sw_cruise, Sw_loiter, Sw_landing, Sw_TO)
+    Sw_refined = max(Sw_cruise, Sw_landing, Sw_TO)
     print("Refined wing area: ", Sw_refined, "ft^2")
 
     print("~~~~~~~~~~~~~~~~~~~~~~")
@@ -139,16 +149,18 @@ def wing_loading(W0):
 
     # THRUST-WEIGHT RATIO - LANDING
     thrust_weight_landing = ((q_landing * C_D0) / wing_loading_landing_uncorr) + (
-        wing_loading_landing_uncorr / (math.pi * q_landing * AR_w * e_0))
+        wing_loading_landing_uncorr / (math.pi * q_landing * AR_w * e_0)
+    )
     thrust_landing = thrust_weight_landing * W_landing
     print("Thrust-to-weight ratio at landing: ", thrust_weight_landing)
     print("Thrust at landing: ", thrust_landing, "lb")
 
     # THRUST-WEIGHT RATIO - COMBAT/SUPERSONIC
-    thrust_weight_supersonic = 0.514*M_max**0.141
-    print('Thrust-to-weight ratio at combat: ', thrust_weight_supersonic)
+    thrust_weight_supersonic = 0.514 * M_max**0.141
+    print("Thrust-to-weight ratio at combat: ", thrust_weight_supersonic)
     thrust_supersonic = thrust_weight_supersonic * W_super
-    print('Thrust at supersonic: ', thrust_supersonic, 'lb')
-    #NOTE: used Table 5.3 for supersonic T/W but it says at cruise - should we change?
+    print("Thrust at supersonic: ", thrust_supersonic, "lb")
+    # NOTE: used Table 5.3 for supersonic T/W but it says at cruise - should we change?
+
 
 wing_loading(9830)

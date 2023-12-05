@@ -30,7 +30,7 @@ def lift_coeff_estimate(W0):
     M_super = 1.25  # Supersonic Mach No.
     gamma = 1.4
     gas_constant = 1716  # ft-lbf/slug-R
-    V_super = M_super * np.sqrt(gamma * gas_constant * Temp_cruise)  # in ft/s
+    V_super = M_super * np.sqrt(gamma * gas_constant * Temp_cruise) * 0.682  # in mph
     W_super_final = W_super_initial * math.exp(
         -R_super * SFC_super / (V_super * L2D_super)
     )
@@ -44,9 +44,11 @@ def lift_coeff_estimate(W0):
 
     # characteristics at flight altitude
     density = 3.64 * 10 ** (-4)  # density at 50,000 ft in slug/ft^3
+    V_c = 880  # in ft/s
     dynamicPress = 0.5 * density * V_c**2
     C_L = W_cruise * (1 + 2 / AR_wing) / (dynamicPress * S_wing)
 
+    V_super = V_super / 0.682
     dynamicPress_super = 0.5 * density * V_super**2
     C_L_super = W_super * (1 + 2 / AR_wing) / (dynamicPress_super * S_wing)
     return [C_L, C_L_super]
@@ -62,7 +64,7 @@ def lift_coeff_estimate(W0):
 # plt.ylabel("Required Lift Coefficient")
 # plt.show()
 
-takeoff_weight = 9839
+takeoff_weight = 10003
 lift_coeff = lift_coeff_estimate(takeoff_weight)
 print("The required lift coefficient is: ", lift_coeff[0])
 print("The required supersonic lift coefficient is: ", lift_coeff[1])
