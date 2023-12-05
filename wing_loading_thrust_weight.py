@@ -12,8 +12,7 @@ def wing_loading(W0):
 
     # dynamic pressure at cruise
     V_cruise = 880  # ft/s
-    density_cruise = 3.64 * 10 ** (-4)  # density at 50,000 ft in slug/ft^3
-    density_cruise = 5.87 * 10 ** (-4)
+    density_cruise = 4.62*10**(-4) # density at 45kft
     q_c = 0.5 * density_cruise * V_cruise**2
     e_0 = 0.8  # typically between 0.7 and 0.85
     # wing dimensions
