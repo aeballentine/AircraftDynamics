@@ -43,26 +43,16 @@ def lift_coeff_estimate(W0):
     AR_wing = bw**2 / S_wing
 
     # characteristics at flight altitude
-    density = 3.64 * 10 ** (-4)  # density at 50,000 ft in slug/ft^3
+    density = 4.62 * 10 ** (-4)  # density at 45,000 ft in slug/ft^3
     V_c = 880  # in ft/s
     dynamicPress = 0.5 * density * V_c**2
     C_L = W_cruise * (1 + 2 / AR_wing) / (dynamicPress * S_wing)
 
-    V_super = V_super / 0.682
+    V_super = V_super / 0.682  # conversion back to ft/s
     dynamicPress_super = 0.5 * density * V_super**2
     C_L_super = W_super * (1 + 2 / AR_wing) / (dynamicPress_super * S_wing)
     return [C_L, C_L_super]
 
-
-# takeoff_weight = np.arange(3000, 10001, 10)
-# lift_coeff = []
-# for weight in takeoff_weight:
-#     lift_coeff.append(lift_coeff_estimate(weight))
-#
-# plt.plot(takeoff_weight, lift_coeff)
-# plt.xlabel("Takeoff Weight [lbf]")
-# plt.ylabel("Required Lift Coefficient")
-# plt.show()
 
 takeoff_weight = 10003
 lift_coeff = lift_coeff_estimate(takeoff_weight)
@@ -79,6 +69,7 @@ print("The Reynold's number is: ", Re)
 
 a = math.sqrt(1.4 * 1717 * 389.97)  # in ft/s
 M = V / a
+print(a)
 print("The subsonic Mach number is: ", M)
 
 print("The supersonic Mach number is: ", 1.25)

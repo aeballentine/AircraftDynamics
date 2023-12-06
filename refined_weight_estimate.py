@@ -4,7 +4,7 @@ from scipy.optimize import fsolve
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # guess W_0
-W_guess = 7000.15  # in lbs from the Talon T-38
+W_guess = 10000.15
 W_old = W_guess
 # initial error so that the while loop runs (start error greater than 0.01, or 1%)
 error = 1
@@ -14,16 +14,17 @@ weights_calc = [W_guess]
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # basic parameters:
 # SUBSONIC range
-R = 1200  # in mi
+R = 1000  # in mi
 # subsonic specific fuel consumption
 SFC = 0.9  # 1/hr
 # subsonic cruise velocity
 V_c = 600  # mph
 # lift to drag ratios:
-L2D_sub = 0.101 ** (-1)
-L2D_super = 0.53 ** (-1)
-L2D_loiter = 0.088 ** (-1)
-L2D_combat = 0.53 ** (-1)
+L2D_sub = 0.09 ** (-1)
+L2D_super = 0.5 ** (-1)
+L2D_loiter = 0.08 ** (-1)
+L2D_combat = 0.08 ** (-1)
+print(L2D_combat, L2D_loiter, L2D_super, L2D_sub)
 
 # COMBAT
 Com = 1.25  # in hr
@@ -32,18 +33,17 @@ Com = 1.25  # in hr
 E = 1 / 2  # in hr
 
 # SUPERSONIC range
-R_super = 75  # in mi
+R_super = 10  # in mi
 # supersonic specific fuel consumption
 SFC_super = 1.5  # (lbm/hr)/lbf - https://www.grc.nasa.gov/www/k-12/airplane/sfc.html
 # Need to convert to 1/hr, getting answer in s^2/(hr*ft) - ask Prof
 # supersonic cruise velocity
-cruise = 50000  # ft
-ceiling = 55000  # ft
 Temp_cruise = 390  # degrees R
 M_super = 1.25  # supersonic Mach No.
 gamma = 1.4
 gas_constant = 1716  # ft-lbf/slug-R
 V_super = M_super * np.sqrt(gamma * gas_constant * Temp_cruise) * 0.682  # in mph
+print((V_super * (1 / 3600) / R_super) ** (-1), "seconds")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # fuel fraction:
@@ -62,6 +62,13 @@ frac_loiter = math.exp(-E * SFC / L2D_loiter)
 # landing
 frac_landing = 0.995
 
+print(
+    "list of fuel fractions: ",
+    1 - frac_combat,
+    1 - frac_loiter,
+    1 - frac_supersonic,
+    1 - frac_subsonic,
+)
 fuel_fraction = 1.06 * (
     1
     - frac_taxi
@@ -72,7 +79,7 @@ fuel_fraction = 1.06 * (
     * frac_loiter
     * frac_landing
 )
-print(fuel_fraction)
+print("fuel fraction: ", fuel_fraction)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,7 +102,7 @@ def weight_ratio(W0, AR, T2W0, W02S, M_max):
     empty_weight_ratio = (
         a + b * W0**C1 * AR**C2 * T2W0**C3 * W02S**C4 * M_max**C5
     ) * k_vs
-    print(empty_weight_ratio)
+    print("empty weight ratio: ", empty_weight_ratio)
     return empty_weight_ratio
 
 
@@ -111,8 +118,8 @@ class IterationTable:
         else:
             M_max = 0.909
             T2W = 0.574  # max thrust to weight
-            AR = 6.5
-            W2S = 29
+            AR = 3.08
+            W2S = 37  # maximum wing loading
             W_new = (W_crew + W_payload) / (
                 1 - fuel_fraction - weight_ratio(W0_guess, AR, T2W, W2S, M_max)
             )

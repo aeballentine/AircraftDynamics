@@ -12,12 +12,12 @@ def wing_loading(W0):
 
     # dynamic pressure at cruise
     V_cruise = 880  # ft/s
-    density_cruise = 4.62*10**(-4) # density at 45kft
+    density_cruise = 4.62 * 10 ** (-4)  # density at 45kft
     q_c = 0.5 * density_cruise * V_cruise**2
     e_0 = 0.8  # typically between 0.7 and 0.85
     # wing dimensions
-    b_w = 28  # wing span in ft
-    S_w = 252  # wing area in ft^2
+    b_w = 24  # wing span in ft
+    S_w = 165  # wing area in ft^2
     AR_w = b_w**2 / S_w
     # lift to drag at cruise
     AR_wetted = 1.4  # from text
@@ -156,7 +156,7 @@ def wing_loading(W0):
 
     # THRUST-WEIGHT RATIO - COMBAT/SUPERSONIC
     thrust_weight_supersonic = 0.514 * M_max**0.141
-    print("Thrust-to-weight ratio at combat: ", thrust_weight_supersonic)
+    print("Thrust-to-weight ratio at supersonic: ", thrust_weight_supersonic)
     thrust_supersonic = thrust_weight_supersonic * W_super
     print("Thrust at supersonic: ", thrust_supersonic, "lb")
     # NOTE: used Table 5.3 for supersonic T/W but it says at cruise - should we change?
