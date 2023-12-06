@@ -24,7 +24,6 @@ L2D_sub = 0.09 ** (-1)
 L2D_super = 0.5 ** (-1)
 L2D_loiter = 0.08 ** (-1)
 L2D_combat = 0.08 ** (-1)
-print(L2D_combat, L2D_loiter, L2D_super, L2D_sub)
 
 # COMBAT
 Com = 1.25  # in hr
@@ -43,7 +42,7 @@ M_super = 1.25  # supersonic Mach No.
 gamma = 1.4
 gas_constant = 1716  # ft-lbf/slug-R
 V_super = M_super * np.sqrt(gamma * gas_constant * Temp_cruise) * 0.682  # in mph
-print((V_super * (1 / 3600) / R_super) ** (-1), "seconds")
+# print((V_super * (1 / 3600) / R_super) ** (-1), "seconds")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # fuel fraction:
@@ -62,13 +61,14 @@ frac_loiter = math.exp(-E * SFC / L2D_loiter)
 # landing
 frac_landing = 0.995
 
-print(
-    "list of fuel fractions: ",
-    1 - frac_combat,
-    1 - frac_loiter,
-    1 - frac_supersonic,
-    1 - frac_subsonic,
-)
+# print(
+#     "list of fuel fractions: ",
+#     1 - frac_combat,
+#     1 - frac_loiter,
+#     1 - frac_supersonic,
+#     1 - frac_subsonic,
+# )
+
 fuel_fraction = 1.06 * (
     1
     - frac_taxi
@@ -79,8 +79,6 @@ fuel_fraction = 1.06 * (
     * frac_loiter
     * frac_landing
 )
-print("fuel fraction: ", fuel_fraction)
-
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # crew and payload weight
@@ -102,7 +100,6 @@ def weight_ratio(W0, AR, T2W0, W02S, M_max):
     empty_weight_ratio = (
         a + b * W0**C1 * AR**C2 * T2W0**C3 * W02S**C4 * M_max**C5
     ) * k_vs
-    print("empty weight ratio: ", empty_weight_ratio)
     return empty_weight_ratio
 
 

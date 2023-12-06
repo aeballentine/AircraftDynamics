@@ -48,7 +48,6 @@ gas_constant = 1716  # ft-lbf/slug-R
 V_super = M_super * np.sqrt(gamma * gas_constant * Temp_cruise) * 0.682  # in mph
 L2D_super = L2D_max  # double check formula
 
-print("l2d cruise: ", L2D_cruise)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # fuel fraction:
 # taxi and take-off
@@ -65,14 +64,6 @@ frac_combat = math.exp(-Com * SFC / L2D_max)
 frac_loiter = math.exp(-E * SFC / L2D_max)
 # landing
 frac_landing = 0.995
-
-print(
-    "fuel fractions:",
-    1 - frac_combat,
-    1 - frac_loiter,
-    1 - frac_supersonic,
-    1 - frac_subsonic,
-)
 
 fuel_fraction = 1.06 * (
     1

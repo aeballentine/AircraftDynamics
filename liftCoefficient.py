@@ -69,7 +69,6 @@ print("The Reynold's number is: ", Re)
 
 a = math.sqrt(1.4 * 1717 * 389.97)  # in ft/s
 M = V / a
-print(a)
 print("The subsonic Mach number is: ", M)
 
 print("The supersonic Mach number is: ", 1.25)

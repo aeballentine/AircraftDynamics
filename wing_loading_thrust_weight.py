@@ -16,7 +16,7 @@ def wing_loading(W0):
     q_c = 0.5 * density_cruise * V_cruise**2
     e_0 = 0.8  # typically between 0.7 and 0.85
     # wing dimensions
-    b_w = 24  # wing span in ft
+    b_w = 24  # wing span in ft, using corrected values from Shannon's literature review
     S_w = 165  # wing area in ft^2
     AR_w = b_w**2 / S_w
     # lift to drag at cruise
