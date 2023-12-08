@@ -24,26 +24,26 @@ gamma = 1.4
 gas_constant = 1716  # ft-lbf/slug-R
 temp_cruise = 390  # degrees R
 mu_cruise = 2.969 * 10 ** (-7) / (4.62 * 10 ** (-4))
-xc_max = 0.83 # (x/c) maximum
-tc = 0.14 # (t/c) ratio
-sweep_angle = 35 # degrees  
-meanchord_wing = 7.095 #ft
-meanchord_HT = 3.444  #ft
-meanchord_VT = 4.963 #ft
-S_HT = 39.884 #ft^2
-S_VT = 126.461 #ft^2
-W0 = 9830 # TAKEOFF WEIGHT - UPDATE
-FL = 0.79*W0**0.41 # fuselage length - l_k for fuselage
-fineness_ratio = 12 # based on pg 157
-Df = FL/fineness_ratio # fuselage diameter - FIX
+xc_max = 0.83  # (x/c) maximum
+tc = 0.14  # (t/c) ratio
+sweep_angle = 35  # degrees
+meanchord_wing = 7.095  # ft
+meanchord_HT = 3.444  # ft
+meanchord_VT = 4.963  # ft
+S_HT = 39.884  # ft^2
+S_VT = 126.461  # ft^2
+W0 = 9830  # TAKEOFF WEIGHT - UPDATE
+FL = 0.79 * W0**0.41  # fuselage length - l_k for fuselage
+fineness_ratio = 12  # based on pg 157
+Df = FL / fineness_ratio  # fuselage diameter - FIX
 h_nose = Df
-S_wet_noseandback = 2*math.pi*(Df/2)*math.sqrt((Df/2)**2+h_nose**2)
+S_wet_noseandback = 2 * math.pi * (Df / 2) * math.sqrt((Df / 2) ** 2 + h_nose**2)
 
 # Solve for velocity range
 velocity = []
 D_a = []
 thrust_cruise = []
-for V in [V_stall, V_stall + 1]:  # range(V_stall, V_c_ft + 1):
+for V in range(V_stall, V_c_ft + 1):
     C_L_aircraft = W_cruise / (0.5 * density_cruise * V**2 * Sw_refined)
     C_D_induced = (C_L_aircraft**2) / (math.pi * AR_w * e_0)
 
@@ -97,10 +97,10 @@ for V in [V_stall, V_stall + 1]:  # range(V_stall, V_c_ft + 1):
     C_D0_aircraft = C_D0_wing + C_D0_HT + C_D0_VT + C_D0_fuse
     print("Drag_0 - ", C_D0_aircraft)
     C_D_aircraft = C_D0_aircraft + C_D_induced
-    #print('Aircraft drag coefficient C_D_aircraft: ', C_D_aircraft)
-    q_cruise = 0.5*density_cruise*(V**2)
-    D_aircraft = C_D_aircraft*q_cruise*Sw_refined
-    #print('Aircraft drag D_a', D_aircraft, 'lb')
+    # print('Aircraft drag coefficient C_D_aircraft: ', C_D_aircraft)
+    q_cruise = 0.5 * density_cruise * (V**2)
+    D_aircraft = C_D_aircraft * q_cruise * Sw_refined
+    # print('Aircraft drag D_a', D_aircraft, 'lb')
     velocity.append(V)
     D_a.append(D_aircraft)
     thrust_cruise.append(897.602)  # cruise thrust from step 5
