@@ -2,131 +2,147 @@ import numpy as np
 import math
 from scipy.optimize import fsolve
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~
-# guess W_0
-W_guess = 10000.15
-W_old = W_guess
-# initial error so that the while loop runs (start error greater than 0.01, or 1%)
-error = 1
-# array to hold all the calculated takeoff weights -> show improvement over iterations
-weights_calc = [W_guess]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~
-# basic parameters:
-# SUBSONIC range
-R = 1000  # in mi
-# subsonic specific fuel consumption
-SFC = 0.9  # 1/hr
-# subsonic cruise velocity
-V_c = 600  # mph
-# lift to drag ratios:
-L2D_sub = 0.09 ** (-1)
-L2D_super = 0.5 ** (-1)
-L2D_loiter = 0.08 ** (-1)
-L2D_combat = 0.08 ** (-1)
+def refined_weight_estimate(
+    temp_cruise,
+    R_sub,
+    R_super,
+    SFC,
+    SFC_super,
+    V_c,
+    M_super,
+    combat_length,
+    loiter_length,
+    num_crew,
+    w_payload,
+    L2D_sub,
+    L2D_loiter,
+    L2D_super,
+    L2D_combat,
+    M_subsonic,
+    T2W,
+    AR,
+    W2S,
+):
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # guess W_0
+    W_guess = 10000.15
 
-# COMBAT
-Com = 1.25  # in hr
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # basic parameters:
+    gamma = 1.4
+    gas_constant = 1716  # ft-lbf/slug-R
+    V_super = M_super * np.sqrt(gamma * gas_constant * temp_cruise) * 0.682  # in mph
 
-# ENDURANCE
-E = 1 / 2  # in hr
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # fuel fraction:
+    # taxi and take-off
+    frac_taxi = 0.97
+    # climb
+    frac_climb = 0.985
+    # subsonic cruise
+    frac_subsonic = math.exp(-R_sub * SFC / (V_c * L2D_sub))
+    # supersonic cruise
+    frac_supersonic = math.exp(-R_super * SFC_super / (V_super * L2D_super))
+    # combat
+    frac_combat = math.exp(-combat_length * SFC / L2D_combat)
+    # loiter
+    frac_loiter = math.exp(-loiter_length * SFC / L2D_loiter)
+    # landing
+    frac_landing = 0.995
 
-# SUPERSONIC range
-R_super = 10  # in mi
-# supersonic specific fuel consumption
-SFC_super = 1.5  # (lbm/hr)/lbf - https://www.grc.nasa.gov/www/k-12/airplane/sfc.html
-# Need to convert to 1/hr, getting answer in s^2/(hr*ft) - ask Prof
-# supersonic cruise velocity
-Temp_cruise = 390  # degrees R
-M_super = 1.25  # supersonic Mach No.
-gamma = 1.4
-gas_constant = 1716  # ft-lbf/slug-R
-V_super = M_super * np.sqrt(gamma * gas_constant * Temp_cruise) * 0.682  # in mph
-# print((V_super * (1 / 3600) / R_super) ** (-1), "seconds")
+    fuel_fraction = 1.06 * (
+        1
+        - frac_taxi
+        * frac_climb
+        * frac_subsonic
+        * frac_supersonic
+        * frac_combat
+        * frac_loiter
+        * frac_landing
+    )
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~
-# fuel fraction:
-# taxi and take-off
-frac_taxi = 0.97
-# climb
-frac_climb = 0.985
-# subsonic cruise
-frac_subsonic = math.exp(-R * SFC / (V_c * L2D_sub))
-# supersonic cruise
-frac_supersonic = math.exp(-R_super * SFC_super / (V_super * L2D_super))
-# combat
-frac_combat = math.exp(-Com * SFC / L2D_combat)
-# loiter
-frac_loiter = math.exp(-E * SFC / L2D_loiter)
-# landing
-frac_landing = 0.995
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # crew and payload weight
+    W_crew = 175 * num_crew
+    W_payload = w_payload
 
-# print(
-#     "list of fuel fractions: ",
-#     1 - frac_combat,
-#     1 - frac_loiter,
-#     1 - frac_supersonic,
-#     1 - frac_subsonic,
-# )
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    class IterationTable:
+        def __init__(self):
+            self.list = []
+            self.M_max = None
+            self.T2W = None
+            self.AR = None
+            self.W2S = None
 
-fuel_fraction = 1.06 * (
-    1
-    - frac_taxi
-    * frac_climb
-    * frac_subsonic
-    * frac_supersonic
-    * frac_combat
-    * frac_loiter
-    * frac_landing
-)
+        def weight_ratio(self, W0):
+            a = -0.02
+            b = 2.16
+            C1 = -0.10
+            C2 = 0.20
+            C3 = 0.04
+            C4 = -0.10
+            C5 = 0.08
+            k_vs = 1.00
+            empty_weight_ratio = (
+                a
+                + b
+                * W0**C1
+                * self.AR**C2
+                * self.T2W**C3
+                * self.W2S**C4
+                * self.M_max**C5
+            ) * k_vs
+            return empty_weight_ratio
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~
-# crew and payload weight
-W_crew = 175 * 2
-W_payload = 0
+        def takeoff_weight(self, W0_guess):
+            W0_guess = W0_guess[0]
+            self.list.append(np.round(W0_guess, decimals=2))
+            if W0_guess < 0:
+                err = 100
+            else:
+                W_new = (W_crew + W_payload) / (
+                    1 - fuel_fraction - self.weight_ratio(W0_guess)
+                )
+                err = np.abs(W_new - W0_guess)
+            return err
 
+    iterations = IterationTable()
+    iterations.M_max = M_subsonic
+    iterations.T2W = T2W
+    iterations.AR = AR
+    iterations.W2S = W2S
+    W_calc = fsolve(iterations.takeoff_weight, np.array([W_guess]))
+    iteration_table = iterations.list
+    empty_weight = iterations.weight_ratio(W_calc[0]) * W_calc[0]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~
-# empty weight ratio
-def weight_ratio(W0, AR, T2W0, W02S, M_max):
-    a = -0.02
-    b = 2.16
-    C1 = -0.10
-    C2 = 0.20
-    C3 = 0.04
-    C4 = -0.10
-    C5 = 0.08
-    k_vs = 1.00
-    empty_weight_ratio = (
-        a + b * W0**C1 * AR**C2 * T2W0**C3 * W02S**C4 * M_max**C5
-    ) * k_vs
-    return empty_weight_ratio
+    takeoff_weight = W_calc[0]
+    W_climb = takeoff_weight * frac_taxi
+    W_cruise = W_climb * frac_climb
+    W_supersonic = W_cruise * frac_subsonic
+    W_combat = W_supersonic * frac_supersonic
+    W_loiter = W_combat * frac_combat
+    W_landing = W_loiter * frac_loiter
+    W_final = W_landing * frac_landing
 
+    intermediate_weights = np.array(
+        [
+            takeoff_weight,
+            W_climb,
+            W_cruise,
+            W_supersonic,
+            W_combat,
+            W_loiter,
+            W_landing,
+            W_final,
+        ]
+    )
 
-class IterationTable:
-    def __init__(self):
-        self.list = []
-
-    def takeoff_weight(self, W0_guess):
-        W0_guess = W0_guess[0]
-        self.list.append(np.round(W0_guess, decimals=2))
-        if W0_guess < 0:
-            err = 100
-        else:
-            M_max = 0.909
-            T2W = 0.574  # max thrust to weight
-            AR = 3.08
-            W2S = 37  # maximum wing loading
-            W_new = (W_crew + W_payload) / (
-                1 - fuel_fraction - weight_ratio(W0_guess, AR, T2W, W2S, M_max)
-            )
-            err = np.abs(W_new - W0_guess)
-        return err
-
-
-iterations = IterationTable()
-W_calc = fsolve(iterations.takeoff_weight, np.array([W_guess]))
-print("The empty weight is: ", np.round(W_calc[0], decimals=2), "lbs")
-print(iterations.list)
-# empty_weight = weight_ratio(W_calc[0]) * W_calc[0]
-# print("The empty weight is: ", np.round(empty_weight, decimals=2), "lbs")
+    # return statement returns the iteration table, the empty weight, and the weights at the *start*
+    # of each mission leg
+    return (
+        np.round(iteration_table, decimals=2),
+        np.round(empty_weight, decimals=2),
+        np.round(intermediate_weights, decimals=2),
+    )
