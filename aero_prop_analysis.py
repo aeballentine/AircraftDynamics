@@ -5,7 +5,7 @@ from scipy.optimize import fsolve
 
 # NOTE - Update C_Lmax for new airfoil, update cruise weight after refined estimate
 
-# def prop_analysis():
+# def prop_analysis(C_Lmax, W_landing, S_wing, V_c, b_w, AR_w, W_cruise, ):
 
 # Define stall speed and cruise speed, conditions
 C_Lmax = 1.7  # Maximum CL for SC2-0414

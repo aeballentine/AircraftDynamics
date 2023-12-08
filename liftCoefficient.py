@@ -34,8 +34,6 @@ def lift_coeff_estimate(
 
     a = math.sqrt(1.4 * 1717 * temp_cruise)  # in ft/s
     M_subsonic = V_c_ft / a
-    print(V_c_ft)
-    print(a)
 
     return (
         np.round(C_L, decimals=2),

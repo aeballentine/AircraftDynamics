@@ -35,6 +35,11 @@ gamma = 1.4
 gas_constant = 1716  # in ft-lbf/slug-R
 V_super = M_super * np.sqrt(gamma * gas_constant * temp_cruise)
 
+# tail parameters
+wing_location = 8  # in ft, from the nose
+tail_end_v = 1  # in ft, from the end of the plane
+tail_end_h = 3  # in ft, from the end of the plane
+
 # run the takeoff weight sizing
 (
     iteration_table,
@@ -68,9 +73,14 @@ w_cruise = (W_supersonic + W_cruise) / 2
 w_loiter = (W_landing + W_loiter) / 2
 w_supersonic = (W_supersonic + W_combat) / 2
 
+a = 0.87
+c = 0.4
+fuselage_length = np.round(a * takeoff_weight**c, decimals=0)
+
 print("The takeoff weight in lbf is: ", takeoff_weight)
 print("The following show fsolve iterations: ", iteration_table)
 print("The empty weight in lbf is: ", empty_weight)
+print("The fuselage length in ft is: ", fuselage_length)
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 # find the lift coefficient
@@ -126,7 +136,18 @@ print("~~~~~~~~~~~~~~~~~~~~~~~")
     Y_h,
     S_h,
     AR_h,
-] = tail_sizing(S_wing=S_wing)
+] = tail_sizing(
+    S_wing=S_wing,
+    fuselage_length=fuselage_length,
+    wing_location=wing_location,
+    tail_end_v=tail_end_v,
+    tail_end_h=tail_end_h,
+    Y_w=Y_wing,
+    sweep_angle_wing=sweep_angle,
+    quarter_chord_w=quarter_chord,
+    avg_chord_w=avg_chord,
+    b_wing=b_w,
+)
 print("Vertical tail characteristics:")
 print(
     "Chord lengths: tip - ",
@@ -278,3 +299,7 @@ print("The following show fsolve iterations: ", iteration_table)
 print("The empty weight in lbf is: ", empty_weight)
 
 print("~~~~~~~~~~~~~~~~~~~~~~~")
+
+w_cruise = (W_supersonic + W_cruise) / 2
+w_loiter = (W_landing + W_loiter) / 2
+w_supersonic = (W_supersonic + W_combat) / 2
