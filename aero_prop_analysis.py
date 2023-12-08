@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
 
-# NOTE - Update C_Lmax for new airfoil, update cruise weight after refined estimate
+# NOTE - update cruise weight after refined estimate
 
 # def prop_analysis(C_Lmax, W_landing, S_wing, V_c, b_w, AR_w, W_cruise, ):
 
@@ -11,19 +11,18 @@ from scipy.optimize import fsolve
 C_Lmax = 1.7  # Maximum CL for SC2-0414
 W_landing = 8461  # TODO
 density_SL = 0.00238  # sea level density in slug/ft^3
+density_cruise = 4.62 * 10 ** (-4)  # density at 45000 ft
 Sw_refined = 239.911  # refined wing area in ft^2 from wing loading
-V_stall = round(math.sqrt(2 * W_landing / (density_SL * Sw_refined * C_Lmax)))  # ft/s
-print(V_stall)
+V_stall = round(math.sqrt(2 * W_landing / (density_cruise * Sw_refined * C_Lmax)))  # ft/s
 V_c_ft = 880  # ft/s
 b_w = 28
 AR_w = b_w**2 / Sw_refined
 e_0 = 1.78 * (1 - (0.045 * AR_w**0.68)) - 0.64  # Refined e_0
 W_cruise = 10000  # cruise weight - UPDATE?
-density_cruise = 4.62 * 10 ** (-4)  # density at 45000 ft
 gamma = 1.4
 gas_constant = 1716  # ft-lbf/slug-R
 temp_cruise = 390  # degrees R
-mu_cruise = 2.969 * 10 ** (-7) / (4.62 * 10 ** (-4))
+mu_cruise = 2.969 * 10 ** (-7) #/ (4.62 * 10 ** (-4))
 xc_max = 0.83  # (x/c) maximum
 tc = 0.14  # (t/c) ratio
 sweep_angle = 35 * np.pi / 180  # converted to radians
@@ -43,36 +42,33 @@ S_wet_noseandback = 2 * math.pi * (Df / 2) * math.sqrt((Df / 2) ** 2 + h_nose**2
 velocity = []
 D_a = []
 thrust_cruise = []
-for V in range(V_stall, V_c_ft + 1):
-    C_L_aircraft = W_cruise / (0.5 * density_cruise * V**2 * Sw_refined)
+for V in range(V_stall, (2*V_c_ft)+1):
+    q_cruise = 0.5 * density_cruise * (V**2)
+    C_L_aircraft = W_cruise / (q_cruise * Sw_refined)
     C_D_induced = (C_L_aircraft**2) / (math.pi * AR_w * e_0)
+    #print('CD induced: ', C_D_induced)
 
-    # Wing (imaginary)
+    # Wing
     M_wing = V / math.sqrt(gamma * gas_constant * temp_cruise)
     Re_wing = (density_cruise * V * meanchord_wing) / mu_cruise
-    C_f_wing = 0.455 / (
-        (math.log10(Re_wing) ** 2.58) * (1 + (0.144 * M_wing**2)) ** 0.65
-    )
+    C_f_wing = 0.455 / ((math.log10(Re_wing) ** 2.58) * (1 + (0.144 * M_wing**2)) ** 0.65)
     Ff_wing = (1 + ((0.6 / xc_max) * tc) + (tc**4)) * (
         1.39 * (M_wing**0.18) * math.cos(sweep_angle) ** 0.28
     )
     S_wet_wing = 2 * Sw_refined
     C_D0_wing = C_f_wing * Ff_wing * (S_wet_wing / Sw_refined)
 
-    # Horizontal Tail (imaginary)
+    # Horizontal Tail
     M_HT = V / math.sqrt(gamma * gas_constant * temp_cruise)
     Re_HT = (density_cruise * V * meanchord_HT) / mu_cruise
-    print(Re_HT)
     C_f_HT = 0.455 / ((math.log10(Re_HT) ** 2.58) * (1 + (0.144 * M_HT**2)) ** 0.65)
-    print(C_f_HT)
     Ff_HT = (1 + ((0.6 / xc_max) * tc) + (tc**4)) * (
         1.39 * (M_wing**0.18) * math.cos(sweep_angle) ** 0.28
     )
-    print(Ff_HT)
     S_wet_HT = 2 * S_HT
     C_D0_HT = C_f_HT * Ff_HT * (S_wet_HT / Sw_refined)
 
-    # Vertical Tail (imaginary)
+    # Vertical Tail
     M_VT = V / math.sqrt(gamma * gas_constant * temp_cruise)
     Re_VT = (density_cruise * V * meanchord_VT) / mu_cruise
     C_f_VT = 0.455 / ((math.log10(Re_VT) ** 2.58) * (1 + (0.144 * M_VT**2)) ** 0.65)
@@ -82,7 +78,7 @@ for V in range(V_stall, V_c_ft + 1):
     S_wet_VT = 2 * S_VT
     C_D0_VT = C_f_VT * Ff_VT * (S_wet_VT / Sw_refined)
 
-    # Fuselage (not imaginary)
+    # Fuselage
     f = FL / Df
     M_fuse = V / math.sqrt(gamma * gas_constant * temp_cruise)
     Re_fuse = (density_cruise * V * FL) / mu_cruise
@@ -95,10 +91,9 @@ for V in range(V_stall, V_c_ft + 1):
 
     # AIRCRAFT
     C_D0_aircraft = C_D0_wing + C_D0_HT + C_D0_VT + C_D0_fuse
-    print("Drag_0 - ", C_D0_aircraft)
+    #print("CD_0 - ", C_D0_aircraft)
     C_D_aircraft = C_D0_aircraft + C_D_induced
     # print('Aircraft drag coefficient C_D_aircraft: ', C_D_aircraft)
-    q_cruise = 0.5 * density_cruise * (V**2)
     D_aircraft = C_D_aircraft * q_cruise * Sw_refined
     # print('Aircraft drag D_a', D_aircraft, 'lb')
     velocity.append(V)
