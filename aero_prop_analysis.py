@@ -27,7 +27,7 @@ xc_max = 0.83 # (x/c) maximum
 tc = 0.14 # (t/c) ratio
 sweep_angle = 35 # degrees  
 meanchord_wing = 7.095 #ft
-meanchord_HT = 3.444 #ft
+meanchord_HT = 3.444  #ft
 meanchord_VT = 4.963 #ft
 S_HT = 39.884 #ft^2
 S_VT = 126.461 #ft^2
@@ -35,7 +35,8 @@ W0 = 9830 # TAKEOFF WEIGHT - UPDATE
 FL = 0.79*W0**0.41 # fuselage length - l_k for fuselage 
 fineness_ratio = 12 # based on pg 157
 Df = FL/fineness_ratio # fuselage diameter - FIX
-S_wet_noseandback = 1000 # RANDOM NUMBER FIX
+h_nose = Df
+S_wet_noseandback = 2*math.pi*(Df/2)*math.sqrt((Df/2)**2+h_nose**2)
 
 # Solve for velocity range
 velocity = []
@@ -82,7 +83,8 @@ for V in range(V_stall, V_c_ft+1):
     C_D0_aircraft = C_D0_wing + C_D0_HT + C_D0_VT + C_D0_fuse
     C_D_aircraft = C_D0_aircraft + C_D_induced
     #print('Aircraft drag coefficient C_D_aircraft: ', C_D_aircraft)
-    D_aircraft = C_D_aircraft*0.5*density_cruise*(V**2)*Sw_refined
+    q_cruise = 0.5*density_cruise*(V**2)
+    D_aircraft = C_D_aircraft*q_cruise*Sw_refined
     #print('Aircraft drag D_a', D_aircraft, 'lb')
     velocity.append(V)
     D_a.append(D_aircraft)
