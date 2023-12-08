@@ -2,6 +2,8 @@ from takeoff_weight import *
 from wing_loading_thrust_weight import *
 from liftCoefficient import *
 from refined_weight_estimate import *
+from initial_wing_sizing import *
+from tail_sizing import *
 
 # cruise altitude specs (at 45,000 ft)
 temp_cruise = 390  # in deg R
@@ -90,6 +92,74 @@ print("The Reynolds number at cruise is: ", Re)
 print("The Mach number at cruise is: ", M_subsonic)
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
+(
+    [S_wing, b_w, AR_wing, avg_chord, sweep_angle, c_tip, c_root, quarter_chord, Y_wing]
+) = initial_wing_sizing(takeoff_weight, M_subsonic)
+
+print("Adjusted for historic trends:")
+print("The area of the wing in ft^2 is: ", S_wing)
+print("The span in ft of the wing is: ", b_w)
+print("The average chord in ft is: ", avg_chord)
+print("The aspect ratio is: ", AR_wing)
+print("The sweep angle in deg is: ", sweep_angle)
+print("The tip and root chords in ft are: ", c_tip, " and ", c_root, "respectively")
+print("The quarter-chord length in ft is: ", quarter_chord)
+print("The length from the center line to the average chord is: ", Y_wing)
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+
+[
+    c_tip_v,
+    c_root_v,
+    avg_chord_v,
+    quarter_chord_v,
+    taper_ratio_v,
+    b_v,
+    Y_v,
+    S_v,
+    AR_v,
+    c_tip_h,
+    c_root_h,
+    taper_ratio_h,
+    avg_chord_h,
+    quarter_chord_h,
+    b_h,
+    Y_h,
+    S_h,
+    AR_h,
+] = tail_sizing(S_wing=S_wing)
+print("Vertical tail characteristics:")
+print(
+    "Chord lengths: tip - ",
+    c_tip_v,
+    ", root - ",
+    c_root_v,
+    ", average - ",
+    avg_chord_v,
+    ", quarter - ",
+    quarter_chord_v,
+)
+print("Taper ratio: ", taper_ratio_v)
+print("Span - ", b_v, ", wing area - ", S_v, ", and aspect ratio - ", AR_v)
+print("Moment arm - ", Y_v)
+
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+
+print("Horizontal tail characteristics:")
+print(
+    "Chord lengths: tip - ",
+    c_tip_h,
+    ", root - ",
+    c_root_h,
+    ", average - ",
+    avg_chord_h,
+    ", quarter - ",
+    quarter_chord_h,
+)
+print("Taper ratio: ", taper_ratio_h)
+print("Span - ", b_h, ", wing area - ", S_h, ", and aspect ratio - ", AR_h)
+print("Moment arm - ", Y_h)
+
+print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 (
     wing_loading_uncorrected,
@@ -159,7 +229,7 @@ print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 new_range = 1000  # in mi
 new_dash = 10  # in mi
-new_AR = 24**2 / refined_wing_area
+AR_wing = b_w**2 / refined_wing_area
 wing_loading_refined_weight = (
     wing_loading_corrected[0],
     wing_loading_corrected[1],
@@ -188,11 +258,10 @@ wing_loading_refined_weight = (
     L2D_combat=thrust_to_weight[3] ** (-1),
     T2W=max(thrust_to_weight),  # max thrust to weight
     W2S=min(wing_loading_refined_weight),  # minimum value
-    AR=new_AR,
+    AR=AR_wing,
     M_subsonic=M_subsonic,
 )
 
-print(max(thrust_to_weight), min(wing_loading_refined_weight), new_AR, M_subsonic)
 (
     takeoff_weight,
     W_climb,
