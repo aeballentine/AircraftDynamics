@@ -27,6 +27,7 @@ def propulsion_analysis(
     fuselage_length,
     M_subsonic,
     dynamic_visc,
+    cruise_thrust,
 ):
     # Define stall speed and cruise speed, conditions
     # density_SL = 0.00238  # sea level density in slug/ft^3
@@ -111,7 +112,7 @@ def propulsion_analysis(
         # print('Aircraft drag D_a', D_aircraft, 'lb')
         velocity.append(V)
         D_a.append(D_aircraft)
-        thrust_cruise.append(726)  # cruise thrust from step 5
+        thrust_cruise.append(cruise_thrust)  # cruise thrust from step 5
 
     # Plot drag vs. velocity
     plt.plot(velocity, D_a, color="blue", label="Drag [lb]")

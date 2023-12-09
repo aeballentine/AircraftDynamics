@@ -376,6 +376,7 @@ v_star = propulsion_analysis(
     fuselage_length=fuselage_length,
     M_subsonic=M_subsonic,
     dynamic_visc=dynamic_visc,
+    cruise_thrust=thrust[1],
 )
 
 print("V* is: ", v_star)
