@@ -5,6 +5,7 @@ from refined_weight_estimate import *
 from initial_wing_sizing import *
 from tail_sizing import *
 from aero_prop_analysis import *
+from static_stability import *
 
 # todo-> questions: do we calculate W/S at stall, and if so, is that the lowest W/S value?
 # todo: fsolve to make tails areas work
@@ -20,7 +21,7 @@ density_loiter = 5.87 * 10 ** (-4)
 
 # original plane specs
 R_sub = 1000  # in mi
-R_super = 15  # in mi
+R_super = 10  # in mi
 SFC = 0.9  # in 1/hr
 SFC_super = 1.5  # in 1/hr
 V_c = 600  # in mph
@@ -34,6 +35,8 @@ e_0 = 0.8
 b_w = 24  # in ft
 S_wing = 166  # in ft^2
 
+engine_weight = 3000  # in lbf
+
 # wing parameters
 c_l_max = 1.7  # from the airfoil plots
 xc_max = 0.83  # location of the maximum (x/c)
@@ -45,7 +48,7 @@ gas_constant = 1716  # in ft-lbf/slug-R
 V_super = M_super * np.sqrt(gamma * gas_constant * temp_cruise)
 
 # tail parameters
-wing_location = 8  # in ft, from the nose
+wing_location = 7  # in ft, from the nose
 tail_end_v = 1  # in ft, from the end of the plane
 tail_end_h = 3  # in ft, from the end of the plane
 
@@ -384,3 +387,38 @@ v_star = propulsion_analysis(
 )
 
 print("V* in ft/s is: ", v_star)
+
+fineness_ratio = 12  # based on pg 157
+Df = fuselage_length / fineness_ratio  # fuselage diameter - FIX
+h_nose = Df
+S_wet_noseandback = 2 * math.pi * (Df / 2) * math.sqrt((Df / 2) ** 2 + h_nose**2)
+S_fuselage = (math.pi * fuselage_length * Df) + S_wet_noseandback
+
+W_fuel = 20  # todo: this needs to be changed
+fuel_location = 0.5  # percent of fuselage
+
+pitch = PitchStability(
+    S_v_tail=S_v,
+    S_h_tail=S_h,
+    S_wing=S_wing,
+    S_fuselage=S_fuselage,
+    takeoff_weight=takeoff_weight,
+    engine_weight=engine_weight,
+    avg_chord=avg_chord,
+    wing_location=wing_location,
+    fuselage_length=fuselage_length,
+    h_tail_end=tail_end_h,
+    c_root_h=c_root_h,
+    c_h_tail=avg_chord_h,
+    v_tail_end=tail_end_v,
+    c_root_v=c_root_v,
+    c_v_tail=avg_chord_v,
+    w_fuel=W_fuel,
+    fuel_location=fuel_location,
+)
+pitch.centroid_location()
+x_cg = pitch.centroid
+print("The location of the center of gravity from the nose is: ", x_cg)
+cg_on_wing = x_cg - wing_location
+print(cg_on_wing)
+print(avg_chord)

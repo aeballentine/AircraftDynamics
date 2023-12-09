@@ -50,7 +50,7 @@ def propulsion_analysis(
     velocity = []
     D_a = []
     thrust_cruise = []
-    for V in range(V_stall, (2 * V_c_ft) + 1):
+    for V in range(V_stall, round(1.2 * V_c_ft) + 1):
         q_cruise = 0.5 * cruise_density * (V**2)
         C_L_aircraft = w_cruise / (q_cruise * S_wing)
         C_D_induced = (C_L_aircraft**2) / (math.pi * AR_wing * e_0)
