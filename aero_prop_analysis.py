@@ -5,18 +5,17 @@ from scipy.optimize import fsolve
 
 # NOTE - update cruise weight after refined estimate
 
-# def prop_analysis(C_Lmax, W_landing, S_wing, V_c, b_w, AR_w, W_cruise, ):
 
 # Define stall speed and cruise speed, conditions
 C_Lmax = 1.7  # Maximum CL for SC2-0414
 W_landing = 8461  # TODO
 density_SL = 0.00238  # sea level density in slug/ft^3
 density_cruise = 4.62 * 10 ** (-4)  # density at 45000 ft
-Sw_refined = 239.911  # refined wing area in ft^2 from wing loading
+Sw_refined = 160  # refined wing area in ft^2 from wing loading
 V_stall = round(math.sqrt(2 * W_landing / (density_cruise * Sw_refined * C_Lmax)))  # ft/s
 V_c_ft = 880  # ft/s
-b_w = 28
-AR_w = b_w**2 / Sw_refined
+b_w = 29.5
+AR_w = 4.8
 e_0 = 1.78 * (1 - (0.045 * AR_w**0.68)) - 0.64  # Refined e_0
 W_cruise = 10000  # cruise weight - UPDATE?
 gamma = 1.4
@@ -31,7 +30,7 @@ meanchord_HT = 3.444  # ft
 meanchord_VT = 4.963  # ft
 S_HT = 39.884  # ft^2
 S_VT = 126.461  # ft^2
-W0 = 9830  # TAKEOFF WEIGHT - UPDATE
+W0 = 9946  # TAKEOFF WEIGHT - UPDATE
 FL = 0.79 * W0**0.41  # fuselage length - l_k for fuselage
 fineness_ratio = 12  # based on pg 157
 Df = FL / fineness_ratio  # fuselage diameter - FIX
@@ -67,7 +66,7 @@ for V in range(V_stall, (2*V_c_ft)+1):
     )
     S_wet_HT = 2 * S_HT
     C_D0_HT = C_f_HT * Ff_HT * (S_wet_HT / Sw_refined)
-
+    
     # Vertical Tail
     M_VT = V / math.sqrt(gamma * gas_constant * temp_cruise)
     Re_VT = (density_cruise * V * meanchord_VT) / mu_cruise
@@ -78,7 +77,7 @@ for V in range(V_stall, (2*V_c_ft)+1):
     S_wet_VT = 2 * S_VT
     C_D0_VT = C_f_VT * Ff_VT * (S_wet_VT / Sw_refined)
 
-    # Fuselage
+    # Fuselage 
     f = FL / Df
     M_fuse = V / math.sqrt(gamma * gas_constant * temp_cruise)
     Re_fuse = (density_cruise * V * FL) / mu_cruise
@@ -91,14 +90,14 @@ for V in range(V_stall, (2*V_c_ft)+1):
 
     # AIRCRAFT
     C_D0_aircraft = C_D0_wing + C_D0_HT + C_D0_VT + C_D0_fuse
-    #print("CD_0 - ", C_D0_aircraft)
+    #print("CD_0: ", C_D0_aircraft)
     C_D_aircraft = C_D0_aircraft + C_D_induced
-    # print('Aircraft drag coefficient C_D_aircraft: ', C_D_aircraft)
+    #print('Aircraft drag coefficient C_D_aircraft: ', C_D_aircraft)
     D_aircraft = C_D_aircraft * q_cruise * Sw_refined
     # print('Aircraft drag D_a', D_aircraft, 'lb')
     velocity.append(V)
     D_a.append(D_aircraft)
-    thrust_cruise.append(897.602)  # cruise thrust from step 5
+    thrust_cruise.append(726)  # cruise thrust from step 5
 
 # Plot drag vs. velocity
 plt.plot(velocity, D_a, color="blue", label="Drag [lb]")
@@ -106,3 +105,15 @@ plt.plot(velocity, thrust_cruise, color="red", label="Cruise Thrust [lb]")
 plt.title("Plot of Aircraft Drag and Thrust vs. Flight Speed")
 plt.legend()
 plt.show()
+
+# Print V star
+def findIntersection(D_a,thrust_cruise):
+    i = 0
+    err = -1
+    while err < 0:
+        D = D_a[-1-i]
+        err = thrust_cruise[-1-i] - D_a[-1-i]
+        i += 1
+    print('V*: ', velocity[-1-i])
+    return velocity[-1-i]
+findIntersection(D_a,thrust_cruise)
