@@ -29,12 +29,12 @@ def initial_weight_estimate(
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~
     # basic parameters:
     # max lift to drag ratio
-    AR_wetted = 1.4  # from Raymer
+    A_wetted = 1.2  # from Raymer figure 3.4
     K_LD = 14
-    L2D_max = K_LD * np.sqrt(AR_wetted)
+    L2D_max = K_LD * np.sqrt(A_wetted)
     # cruise lift to drag ratio
     L2D_cruise = 0.866 * L2D_max
-    L2D_super = L2D_max
+    L2D_super = 0.25 * L2D_max
 
     # supersonic cruise velocity
     gamma = 1.4  # dimensionless

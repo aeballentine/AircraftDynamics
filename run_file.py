@@ -5,6 +5,9 @@ from refined_weight_estimate import *
 from initial_wing_sizing import *
 from tail_sizing import *
 
+# todo-> questions: do we calculate W/S at stall, and if so, is that the lowest W/S value?
+# todo: fsolve to make wing area work
+
 # cruise altitude specs (at 45,000 ft)
 temp_cruise = 390  # in deg R
 density_cruise = 4.62 * 10 ** (-4)  # in slug/ft^3
@@ -14,8 +17,8 @@ dynamic_visc = 2.969 * 10 ** (-7)  # in slug/ft-s
 density_loiter = 5.87 * 10 ** (-4)
 
 # original plane specs
-R_sub = 1200  # in mi
-R_super = 75  # in mi
+R_sub = 900  # in mi
+R_super = 10  # in mi
 SFC = 0.9  # in 1/hr
 SFC_super = 1.5  # in 1/hr
 V_c = 600  # in mph
@@ -27,7 +30,7 @@ payload = 0  # in lbf
 
 e_0 = 0.8
 b_w = 24  # in ft
-S_wing = 164  # in ft^2
+S_wing = 166  # in ft^2
 c_l_max = 1.7  # from the airfoil plots
 
 # calculated values
@@ -77,11 +80,15 @@ a = 0.87
 c = 0.4
 fuselage_length = np.round(a * takeoff_weight**c, decimals=0)
 
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("The takeoff weight in lbf is: ", takeoff_weight)
 print("The following show fsolve iterations: ", iteration_table)
 print("The empty weight in lbf is: ", empty_weight)
 print("The fuselage length in ft is: ", fuselage_length)
 print("~~~~~~~~~~~~~~~~~~~~~~~")
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+
 
 # find the lift coefficient
 cl, cl_super, Re, M_subsonic = lift_coeff_estimate(
@@ -100,6 +107,7 @@ print("The required coefficient of lift at cruise is: ", cl)
 print("The required coefficient of lift at supersonic dash is: ", cl_super)
 print("The Reynolds number at cruise is: ", Re)
 print("The Mach number at cruise is: ", M_subsonic)
+print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 (
@@ -181,6 +189,7 @@ print("Span - ", b_h, ", wing area - ", S_h, ", and aspect ratio - ", AR_h)
 print("Moment arm - ", Y_h)
 
 print("~~~~~~~~~~~~~~~~~~~~~~~")
+print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 (
     wing_loading_uncorrected,
@@ -195,6 +204,7 @@ print("~~~~~~~~~~~~~~~~~~~~~~~")
     temp_cruise=temp_cruise,
     V_c=V_c,
     M_super=M_super,
+    M_sub=M_subsonic,
     e_0=0.8,
     b_w=b_w,
     S_w=S_wing,
@@ -228,6 +238,10 @@ print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 print("List of new wing areas in ft^2: ", wing_areas)
 print("Refined wing area in ft^2: ", refined_wing_area)
+print(
+    "Percent change in wing area: ",
+    np.round((refined_wing_area - S_wing) / S_wing * 100, decimals=2),
+)
 
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
@@ -246,11 +260,10 @@ print("Thrust in lbf at loiter: ", thrust[3])
 print("Thrust in lbf at landing: ", thrust[4])
 
 print("~~~~~~~~~~~~~~~~~~~~~~~")
+print("~~~~~~~~~~~~~~~~~~~~~~~")
 
-
-new_range = 1000  # in mi
-new_dash = 10  # in mi
 AR_wing = b_w**2 / refined_wing_area
+takeoff_weight_old = takeoff_weight
 wing_loading_refined_weight = (
     wing_loading_corrected[0],
     wing_loading_corrected[1],
@@ -263,8 +276,8 @@ wing_loading_refined_weight = (
     intermediate_weights,
 ) = refined_weight_estimate(
     temp_cruise=temp_cruise,
-    R_sub=new_range,
-    R_super=new_dash,
+    R_sub=R_sub,
+    R_super=R_super,
     SFC=SFC,
     SFC_super=SFC_super,
     V_c=V_c,
@@ -277,8 +290,8 @@ wing_loading_refined_weight = (
     L2D_loiter=thrust_to_weight[3] ** (-1),
     L2D_super=thrust_to_weight[2] ** (-1),
     L2D_combat=thrust_to_weight[3] ** (-1),
-    T2W=max(thrust_to_weight),  # max thrust to weight
-    W2S=min(wing_loading_refined_weight),  # minimum value
+    T2W=thrust_to_weight[0],  # thrust to weight at takeoff
+    W2S=min(wing_loading_refined_weight),  # minimum value, disregarding loiter
     AR=AR_wing,
     M_subsonic=M_subsonic,
 )
@@ -297,7 +310,14 @@ wing_loading_refined_weight = (
 print("The takeoff weight in lbf is: ", takeoff_weight)
 print("The following show fsolve iterations: ", iteration_table)
 print("The empty weight in lbf is: ", empty_weight)
+print(
+    "The percent change in takeoff weight is: ",
+    np.round(
+        (takeoff_weight - takeoff_weight_old) / takeoff_weight_old * 100, decimals=2
+    ),
+)
 
+print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 w_cruise = (W_supersonic + W_cruise) / 2

@@ -9,6 +9,7 @@ def wing_loading(
     temp_cruise,
     V_c,
     M_super,
+    M_sub,
     e_0,
     b_w,
     S_w,
@@ -61,9 +62,9 @@ def wing_loading(
     density_airport = density_SL
     TOP = 160  # based on S_g (2500 ft) and Fig. 5.4
     sigma = density_airport / density_SL
-    C_LTO = c_l_max
+    C_LTO = c_l_max / 1.21  # todo: added this from Raymer pg. 129
 
-    thrust_weight_TO = 0.488 * M_super**0.728  # table 5.3
+    thrust_weight_TO = 0.488 * M_sub**0.728  # table 5.3
     wing_loading_TO_uncorr = TOP * sigma * C_LTO * thrust_weight_TO
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -110,6 +111,9 @@ def wing_loading(
     Sw_loiter = w_loiter / wing_loading_loiter_corr
     wing_areas = np.array([Sw_TO, Sw_cruise, Sw_landing, Sw_loiter])
     # Sw_refined = refined wing loading is the maximum of the wing areas
+    Sw_refined = wing_areas[1]
+
+    AR_w = b_w**2 / Sw_refined
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

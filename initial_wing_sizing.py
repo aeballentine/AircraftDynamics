@@ -4,10 +4,10 @@ import numpy as np
 def initial_wing_sizing(W0, M_subsonic):
     # span and aspect ratio calculations
     S_new = (
-        W0 / 60
+        W0 / 60  # todo: changed this from 60
     )  # guessing based on values between typical jet trainer and jet fighter
-    a = 4.11
-    c = -0.622
+    a = 4.737  # todo: old value - 4.11
+    c = -0.979  # todo: old value: -0.622
     AR_new = a * M_subsonic**c
     b_new = np.sqrt(AR_new * S_new)
 

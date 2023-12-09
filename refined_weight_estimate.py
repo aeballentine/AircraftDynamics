@@ -76,24 +76,31 @@ def refined_weight_estimate(
             self.AR = None
             self.W2S = None
 
-        def weight_ratio(self, W0):
-            a = -0.02
-            b = 2.16
-            C1 = -0.10
-            C2 = 0.20
-            C3 = 0.04
-            C4 = -0.10
-            C5 = 0.08
-            k_vs = 1.00
-            empty_weight_ratio = (
-                a
-                + b
-                * W0**C1
-                * self.AR**C2
-                * self.T2W**C3
-                * self.W2S**C4
-                * self.M_max**C5
-            ) * k_vs
+        # def weight_ratio(self, W0):
+        #     a = -0.02
+        #     b = 2.16
+        #     C1 = -0.10
+        #     C2 = 0.20
+        #     C3 = 0.04
+        #     C4 = -0.10
+        #     C5 = 0.08
+        #     k_vs = 1.00
+        #     empty_weight_ratio = (
+        #         a
+        #         + b
+        #         * W0**C1
+        #         * self.AR**C2
+        #         * self.T2W**C3
+        #         * self.W2S**C4
+        #         * self.M_max**C5
+        #     ) * k_vs
+        #     return empty_weight_ratio
+
+        @staticmethod
+        def weight_ratio(W0):
+            A = 2.34  # jet fighter: 2.34  # jet trainer: 1.59
+            C = -0.13  # jet fighter: -0.13  # jet trainer: -0.10
+            empty_weight_ratio = A * W0**C
             return empty_weight_ratio
 
         def takeoff_weight(self, W0_guess):
