@@ -146,10 +146,13 @@ def refined_weight_estimate(
         ]
     )
 
+    fuel_fraction_cruise = 1 - frac_subsonic
+
     # return statement returns the iteration table, the empty weight, and the weights at the *start*
     # of each mission leg
     return (
         np.round(iteration_table, decimals=2),
         np.round(empty_weight, decimals=2),
         np.round(intermediate_weights, decimals=2),
+        np.round(fuel_fraction_cruise, decimals=4),
     )

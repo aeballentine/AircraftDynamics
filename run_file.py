@@ -41,6 +41,7 @@ engine_weight = 3000  # in lbf
 c_l_max = 1.7  # from the airfoil plots
 xc_max = 0.83  # location of the maximum (x/c)
 tc = 0.14  # maximum thickness
+lift_slope = 6.5  # lift/radians
 
 # calculated values
 gamma = 1.4
@@ -51,6 +52,7 @@ V_super = M_super * np.sqrt(gamma * gas_constant * temp_cruise)
 wing_location = 7  # in ft, from the nose
 tail_end_v = 1  # in ft, from the end of the plane
 tail_end_h = 3  # in ft, from the end of the plane
+lift_slope_h = 5.3  # todo: fix this value
 
 # run the takeoff weight sizing
 (
@@ -244,6 +246,7 @@ while err > 0.1:
         iteration_table,
         empty_weight,
         intermediate_weights,
+        fuel_fraction_cruise,
     ) = refined_weight_estimate(
         temp_cruise=temp_cruise,
         R_sub=R_sub,
@@ -387,6 +390,8 @@ v_star = propulsion_analysis(
 )
 
 print("V* in ft/s is: ", v_star)
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 fineness_ratio = 12  # based on pg 157
 Df = fuselage_length / fineness_ratio  # fuselage diameter - FIX
@@ -394,10 +399,10 @@ h_nose = Df
 S_wet_noseandback = 2 * math.pi * (Df / 2) * math.sqrt((Df / 2) ** 2 + h_nose**2)
 S_fuselage = (math.pi * fuselage_length * Df) + S_wet_noseandback
 
-W_fuel = 20  # todo: this needs to be changed
-fuel_location = 0.5  # percent of fuselage
 
-pitch = PitchStability(
+W_fuel = fuel_fraction_cruise * takeoff_weight  # todo: this needs to be changed
+
+x_cg = center_of_gravity(
     S_v_tail=S_v,
     S_h_tail=S_h,
     S_wing=S_wing,
@@ -414,11 +419,51 @@ pitch = PitchStability(
     c_root_v=c_root_v,
     c_v_tail=avg_chord_v,
     w_fuel=W_fuel,
-    fuel_location=fuel_location,
+    fuel_location=wing_location,
+    landing_location=0.75,
+    engine_location=0.7,
+    Y_wing=Y_wing,
+    sweep_angle=sweep_angle,
+    Y_v_tail=Y_v,
+    Y_h_tail=Y_h,
 )
-pitch.centroid_location()
-x_cg = pitch.centroid
 print("The location of the center of gravity from the nose is: ", x_cg)
-cg_on_wing = x_cg - wing_location
-print(cg_on_wing)
-print(avg_chord)
+wing_25 = np.round(
+    wing_location + Y_wing * np.tan(sweep_angle) + quarter_chord, decimals=2
+)
+wing_35 = np.round(
+    wing_location + Y_wing * np.tan(sweep_angle) + 0.35 * avg_chord, decimals=2
+)
+print("25% of the wing to 35% of the wing is: ", wing_25, " - ", wing_35)
+
+
+fuselage_weight = 4.8 * S_fuselage
+fuselage_diameter = 3  # todo: check this value
+x_np = neutral_point(
+    quarter_chord=quarter_chord,
+    avg_chord=avg_chord,
+    S_wing=S_wing,
+    M_subsonic=M_subsonic,
+    quarter_c_h=quarter_chord_h,
+    S_h_tail=S_h,
+    Cl_alpha=lift_slope,
+    AR_wing=AR_wing,
+    sweep_angle=sweep_angle,
+    fuselage_diameter=fuselage_diameter,
+    fuselage_length=fuselage_length,
+    fuselage_weight=fuselage_weight,
+    c_root=c_root,
+    b_w=b_w,
+    c_root_h=c_root_h,
+    AR_h_tail=AR_h,
+    Cl_alpha_h=lift_slope_h,
+    wing_location=wing_location,
+    Y_wing=Y_wing,
+    h_tail_end=tail_end_h,
+    Y_h_tail=Y_h,
+)
+
+print("The location of the neutral point is: ", x_np)
+
+static_margin = x_np - x_cg
+print("The static margin is: ", static_margin)

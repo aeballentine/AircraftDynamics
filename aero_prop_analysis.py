@@ -119,7 +119,7 @@ def propulsion_analysis(
     plt.plot(velocity, thrust_cruise, color="red", label="Cruise Thrust [lb]")
     plt.title("Plot of Aircraft Drag and Thrust vs. Flight Speed")
     plt.legend()
-    plt.show()
+    # plt.show()
 
     # Print V star
     def findIntersection(D_a, thrust_cruise):

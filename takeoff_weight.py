@@ -3,7 +3,6 @@ import math
 from scipy.optimize import fsolve
 
 # save this reference: https://www.grc.nasa.gov/www/k-12/airplane/sfc.html
-# Todo: check if this still converges
 
 
 def initial_weight_estimate(
