@@ -107,9 +107,9 @@ def propulsion_analysis(
         C_D0_aircraft = C_D0_wing + C_D0_HT + C_D0_VT + C_D0_fuse
         # print("CD_0: ", C_D0_aircraft)
         C_D_aircraft = C_D0_aircraft + C_D_induced
-        # print('Aircraft drag coefficient C_D_aircraft: ', C_D_aircraft)
+        # print("Aircraft drag coefficient C_D_aircraft: ", C_D_aircraft)
         D_aircraft = C_D_aircraft * q_cruise * S_wing
-        # print('Aircraft drag D_a', D_aircraft, 'lb')
+        # print("Aircraft drag D_a", D_aircraft, "lb")
         velocity.append(V)
         D_a.append(D_aircraft)
         thrust_cruise.append(cruise_thrust)  # cruise thrust from step 5

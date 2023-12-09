@@ -248,6 +248,7 @@ print(
     "Percent change in wing area: ",
     np.round((refined_wing_area - S_wing) / S_wing * 100, decimals=2),
 )
+S_wing = refined_wing_area
 
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
@@ -350,6 +351,80 @@ print("The Mach number at cruise is: ", M_subsonic)
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
+
+(
+    wing_loading_uncorrected,
+    wing_loading_corrected,
+    wing_areas,
+    thrust_to_weight,
+    thrust,
+) = wing_loading(
+    W0=takeoff_weight,
+    cruise_density=density_cruise,
+    loiter_density=density_loiter,
+    temp_cruise=temp_cruise,
+    V_c=V_c,
+    M_super=M_super,
+    M_sub=M_subsonic,
+    e_0=0.8,
+    b_w=b_w,
+    S_w=S_wing,
+    takeoff_weight=takeoff_weight,
+    w_cruise=w_cruise,
+    w_loiter=w_loiter,
+    w_supersonic=w_supersonic,
+    w_landing=W_landing,
+    c_l_max=c_l_max,
+)
+
+# todo: know this is static
+refined_wing_area = wing_areas[1]
+
+# takeoff, cruise, supersonic, loiter, landing
+print("Wing loading uncorrected at takeoff: ", wing_loading_uncorrected[0])
+print("Wing loading uncorrected at cruise: ", wing_loading_uncorrected[1])
+print("Wing loading uncorrected at supersonic dash: ", wing_loading_uncorrected[2])
+print("Wing loading uncorrected at loiter: ", wing_loading_uncorrected[3])
+print("Wing loading uncorrected at landing: ", wing_loading_uncorrected[4])
+
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+
+print("Wing loading corrected at takeoff: ", wing_loading_corrected[0])
+print("Wing loading corrected at cruise: ", wing_loading_corrected[1])
+print("Wing loading corrected at supersonic dash: ", wing_loading_corrected[2])
+print("Wing loading corrected at loiter: ", wing_loading_corrected[3])
+print("Wing loading corrected at landing: ", wing_loading_corrected[4])
+
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+
+print("List of new wing areas in ft^2: ", wing_areas)
+print("Refined wing area in ft^2: ", refined_wing_area)
+print(
+    "Percent change in wing area: ",
+    np.round((refined_wing_area - S_wing) / S_wing * 100, decimals=2),
+)
+S_wing = refined_wing_area
+
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+
+print("Thrust to weight ratio at takeoff: ", thrust_to_weight[0])
+print("Thrust to weight ratio at cruise: ", thrust_to_weight[1])
+print("Thrust to weight ratio at supersonic dash: ", thrust_to_weight[2])
+print("Thrust to weight ratio at loiter: ", thrust_to_weight[3])
+print("Thrust to weight ratio at landing: ", thrust_to_weight[4])
+
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+
+print("Thrust in lbf at takeoff: ", thrust[0])
+print("Thrust in lbf at cruise: ", thrust[1])
+print("Thrust in lbf at supersonic dash: ", thrust[2])
+print("Thrust in lbf at loiter: ", thrust[3])
+print("Thrust in lbf at landing: ", thrust[4])
+
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+
+
 fuselage_length = np.round(a * takeoff_weight**c, decimals=0)
 print("The new fuselage length is: ", fuselage_length)
 print("~~~~~~~~~~~~~~~~~~~~~~~")
@@ -359,7 +434,7 @@ v_star = propulsion_analysis(
     c_l_max=c_l_max,
     w_landing=W_landing,
     cruise_density=density_cruise,
-    S_wing=S_wing,
+    S_wing=refined_wing_area,
     V_c=V_c,
     AR_wing=AR_wing,
     w_cruise=w_cruise,
