@@ -6,114 +6,131 @@ from scipy.optimize import fsolve
 # NOTE - update cruise weight after refined estimate
 
 
-# Define stall speed and cruise speed, conditions
-C_Lmax = 1.7  # Maximum CL for SC2-0414
-W_landing = 8461  # TODO
-density_SL = 0.00238  # sea level density in slug/ft^3
-density_cruise = 4.62 * 10 ** (-4)  # density at 45000 ft
-Sw_refined = 160  # refined wing area in ft^2 from wing loading
-V_stall = round(math.sqrt(2 * W_landing / (density_cruise * Sw_refined * C_Lmax)))  # ft/s
-V_c_ft = 880  # ft/s
-b_w = 29.5
-AR_w = 4.8
-e_0 = 1.78 * (1 - (0.045 * AR_w**0.68)) - 0.64  # Refined e_0
-W_cruise = 10000  # cruise weight - UPDATE?
-gamma = 1.4
-gas_constant = 1716  # ft-lbf/slug-R
-temp_cruise = 390  # degrees R
-mu_cruise = 2.969 * 10 ** (-7) #/ (4.62 * 10 ** (-4))
-xc_max = 0.83  # (x/c) maximum
-tc = 0.14  # (t/c) ratio
-sweep_angle = 35 * np.pi / 180  # converted to radians
-meanchord_wing = 7.095  # ft
-meanchord_HT = 3.444  # ft
-meanchord_VT = 4.963  # ft
-S_HT = 39.884  # ft^2
-S_VT = 126.461  # ft^2
-W0 = 9946  # TAKEOFF WEIGHT - UPDATE
-FL = 0.79 * W0**0.41  # fuselage length - l_k for fuselage
-fineness_ratio = 12  # based on pg 157
-Df = FL / fineness_ratio  # fuselage diameter - FIX
-h_nose = Df
-S_wet_noseandback = 2 * math.pi * (Df / 2) * math.sqrt((Df / 2) ** 2 + h_nose**2)
+def propulsion_analysis(
+    c_l_max,
+    w_landing,
+    cruise_density,
+    S_wing,
+    V_c,
+    AR_wing,
+    w_cruise,
+    takeoff_weight,
+    cruise_temp,
+    Re_wing,
+    xc_max,
+    tc,
+    sweep_angle,
+    c_h_tail,
+    c_v_tail,
+    S_h_tail,
+    S_v_tail,
+    fuselage_length,
+    M_subsonic,
+    dynamic_visc,
+):
+    # Define stall speed and cruise speed, conditions
+    # density_SL = 0.00238  # sea level density in slug/ft^3
+    V_stall = round(
+        math.sqrt(2 * w_landing / (cruise_density * S_wing * c_l_max))
+    )  # ft/s
+    V_c_ft = round(V_c / 0.682)  # ft/s
+    # b_w = 29.5
+    e_0 = 1.78 * (1 - (0.045 * AR_wing**0.68)) - 0.64  # Refined e_0
+    gamma = 1.4
+    gas_constant = 1716  # ft-lbf/slug-R
+    # mu_cruise = 2.969 * 10 ** (-7)  # / (4.62 * 10 ** (-4))
+    sweep_angle = sweep_angle * np.pi / 180  # conversion to radians
+    fineness_ratio = 12  # based on pg 157
+    Df = fuselage_length / fineness_ratio  # fuselage diameter - FIX
+    h_nose = Df
+    S_wet_noseandback = 2 * math.pi * (Df / 2) * math.sqrt((Df / 2) ** 2 + h_nose**2)
 
-# Solve for velocity range
-velocity = []
-D_a = []
-thrust_cruise = []
-for V in range(V_stall, (2*V_c_ft)+1):
-    q_cruise = 0.5 * density_cruise * (V**2)
-    C_L_aircraft = W_cruise / (q_cruise * Sw_refined)
-    C_D_induced = (C_L_aircraft**2) / (math.pi * AR_w * e_0)
-    #print('CD induced: ', C_D_induced)
+    # Solve for velocity range
+    velocity = []
+    D_a = []
+    thrust_cruise = []
+    for V in range(V_stall, (2 * V_c_ft) + 1):
+        q_cruise = 0.5 * cruise_density * (V**2)
+        C_L_aircraft = w_cruise / (q_cruise * S_wing)
+        C_D_induced = (C_L_aircraft**2) / (math.pi * AR_wing * e_0)
+        # print('CD induced: ', C_D_induced)
 
-    # Wing
-    M_wing = V / math.sqrt(gamma * gas_constant * temp_cruise)
-    Re_wing = (density_cruise * V * meanchord_wing) / mu_cruise
-    C_f_wing = 0.455 / ((math.log10(Re_wing) ** 2.58) * (1 + (0.144 * M_wing**2)) ** 0.65)
-    Ff_wing = (1 + ((0.6 / xc_max) * tc) + (tc**4)) * (
-        1.39 * (M_wing**0.18) * math.cos(sweep_angle) ** 0.28
-    )
-    S_wet_wing = 2 * Sw_refined
-    C_D0_wing = C_f_wing * Ff_wing * (S_wet_wing / Sw_refined)
+        # Wing
+        M_wing = M_subsonic  # todo: do we need to multiply this by the sweep angle?
+        # Re_wing = (density_cruise * V * meanchord_wing) / mu_cruise
+        C_f_wing = 0.455 / (
+            (math.log10(Re_wing) ** 2.58) * (1 + (0.144 * M_wing**2)) ** 0.65
+        )
+        Ff_wing = (1 + ((0.6 / xc_max) * tc) + (tc**4)) * (
+            1.39 * (M_wing**0.18) * math.cos(sweep_angle) ** 0.28
+        )
+        S_wet_wing = 2 * S_wing
+        C_D0_wing = C_f_wing * Ff_wing * (S_wet_wing / S_wing)
 
-    # Horizontal Tail
-    M_HT = V / math.sqrt(gamma * gas_constant * temp_cruise)
-    Re_HT = (density_cruise * V * meanchord_HT) / mu_cruise
-    C_f_HT = 0.455 / ((math.log10(Re_HT) ** 2.58) * (1 + (0.144 * M_HT**2)) ** 0.65)
-    Ff_HT = (1 + ((0.6 / xc_max) * tc) + (tc**4)) * (
-        1.39 * (M_wing**0.18) * math.cos(sweep_angle) ** 0.28
-    )
-    S_wet_HT = 2 * S_HT
-    C_D0_HT = C_f_HT * Ff_HT * (S_wet_HT / Sw_refined)
-    
-    # Vertical Tail
-    M_VT = V / math.sqrt(gamma * gas_constant * temp_cruise)
-    Re_VT = (density_cruise * V * meanchord_VT) / mu_cruise
-    C_f_VT = 0.455 / ((math.log10(Re_VT) ** 2.58) * (1 + (0.144 * M_VT**2)) ** 0.65)
-    Ff_VT = (1 + ((0.6 / xc_max) * tc) + (tc**4)) * (
-        1.39 * (M_VT**0.18) * math.cos(sweep_angle) ** 0.28
-    )
-    S_wet_VT = 2 * S_VT
-    C_D0_VT = C_f_VT * Ff_VT * (S_wet_VT / Sw_refined)
+        # Horizontal Tail
+        M_HT = V / math.sqrt(gamma * gas_constant * cruise_temp)
+        Re_HT = (cruise_density * V * c_h_tail) / dynamic_visc
+        C_f_HT = 0.455 / (
+            (math.log10(Re_HT) ** 2.58) * (1 + (0.144 * M_HT**2)) ** 0.65
+        )
+        Ff_HT = (1 + ((0.6 / xc_max) * tc) + (tc**4)) * (
+            1.39 * (M_wing**0.18) * math.cos(sweep_angle) ** 0.28
+        )
+        S_wet_HT = 2 * S_h_tail
+        C_D0_HT = C_f_HT * Ff_HT * (S_wet_HT / S_wing)
 
-    # Fuselage 
-    f = FL / Df
-    M_fuse = V / math.sqrt(gamma * gas_constant * temp_cruise)
-    Re_fuse = (density_cruise * V * FL) / mu_cruise
-    C_f_fuse = 0.455 / (
-        (math.log10(Re_fuse) ** 2.58) * (1 + (0.144 * M_fuse**2)) ** 0.65
-    )
-    Ff_fuse = 1 + (60 / (f**3)) + (f / 400)
-    S_wet_fuse = (math.pi * FL * Df) + S_wet_noseandback
-    C_D0_fuse = C_f_fuse * Ff_fuse * (S_wet_fuse / Sw_refined)
+        # Vertical Tail
+        M_VT = V / math.sqrt(gamma * gas_constant * cruise_temp)
+        Re_VT = (cruise_density * V * c_v_tail) / dynamic_visc
+        C_f_VT = 0.455 / (
+            (math.log10(Re_VT) ** 2.58) * (1 + (0.144 * M_VT**2)) ** 0.65
+        )
+        Ff_VT = (1 + ((0.6 / xc_max) * tc) + (tc**4)) * (
+            1.39 * (M_VT**0.18) * math.cos(sweep_angle) ** 0.28
+        )
+        S_wet_VT = 2 * S_v_tail
+        C_D0_VT = C_f_VT * Ff_VT * (S_wet_VT / S_wing)
 
-    # AIRCRAFT
-    C_D0_aircraft = C_D0_wing + C_D0_HT + C_D0_VT + C_D0_fuse
-    #print("CD_0: ", C_D0_aircraft)
-    C_D_aircraft = C_D0_aircraft + C_D_induced
-    #print('Aircraft drag coefficient C_D_aircraft: ', C_D_aircraft)
-    D_aircraft = C_D_aircraft * q_cruise * Sw_refined
-    # print('Aircraft drag D_a', D_aircraft, 'lb')
-    velocity.append(V)
-    D_a.append(D_aircraft)
-    thrust_cruise.append(726)  # cruise thrust from step 5
+        # Fuselage
+        f = fuselage_length / Df
+        M_fuse = V / math.sqrt(gamma * gas_constant * cruise_temp)
+        Re_fuse = (cruise_density * V * fuselage_length) / dynamic_visc
+        C_f_fuse = 0.455 / (
+            (math.log10(Re_fuse) ** 2.58) * (1 + (0.144 * M_fuse**2)) ** 0.65
+        )
+        Ff_fuse = 1 + (60 / (f**3)) + (f / 400)
+        S_wet_fuse = (math.pi * fuselage_length * Df) + S_wet_noseandback
+        C_D0_fuse = C_f_fuse * Ff_fuse * (S_wet_fuse / S_wing)
 
-# Plot drag vs. velocity
-plt.plot(velocity, D_a, color="blue", label="Drag [lb]")
-plt.plot(velocity, thrust_cruise, color="red", label="Cruise Thrust [lb]")
-plt.title("Plot of Aircraft Drag and Thrust vs. Flight Speed")
-plt.legend()
-plt.show()
+        # AIRCRAFT
+        C_D0_aircraft = C_D0_wing + C_D0_HT + C_D0_VT + C_D0_fuse
+        # print("CD_0: ", C_D0_aircraft)
+        C_D_aircraft = C_D0_aircraft + C_D_induced
+        # print('Aircraft drag coefficient C_D_aircraft: ', C_D_aircraft)
+        D_aircraft = C_D_aircraft * q_cruise * S_wing
+        # print('Aircraft drag D_a', D_aircraft, 'lb')
+        velocity.append(V)
+        D_a.append(D_aircraft)
+        thrust_cruise.append(726)  # cruise thrust from step 5
 
-# Print V star
-def findIntersection(D_a,thrust_cruise):
-    i = 0
-    err = -1
-    while err < 0:
-        D = D_a[-1-i]
-        err = thrust_cruise[-1-i] - D_a[-1-i]
-        i += 1
-    print('V*: ', velocity[-1-i])
-    return velocity[-1-i]
-findIntersection(D_a,thrust_cruise)
+    # Plot drag vs. velocity
+    plt.plot(velocity, D_a, color="blue", label="Drag [lb]")
+    plt.plot(velocity, thrust_cruise, color="red", label="Cruise Thrust [lb]")
+    plt.title("Plot of Aircraft Drag and Thrust vs. Flight Speed")
+    plt.legend()
+    plt.show()
+
+    # Print V star
+    def findIntersection(D_a, thrust_cruise):
+        i = 0
+        err = -1
+        while err < 0:
+            D = D_a[-1 - i]
+            err = thrust_cruise[-1 - i] - D_a[-1 - i]
+            i += 1
+        print("V*: ", velocity[-1 - i])
+        return velocity[-1 - i]
+
+    v_star = findIntersection(D_a, thrust_cruise)
+
+    return v_star

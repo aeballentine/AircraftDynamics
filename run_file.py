@@ -4,9 +4,11 @@ from liftCoefficient import *
 from refined_weight_estimate import *
 from initial_wing_sizing import *
 from tail_sizing import *
+from aero_prop_analysis import *
 
 # todo-> questions: do we calculate W/S at stall, and if so, is that the lowest W/S value?
-# todo: fsolve to make wing area work
+# todo: fsolve to make tails areas work
+# todo: supersonic thrust to drag plot (12.4.2, 12.4.5, 12.5.9, and 12.5.10)
 
 # cruise altitude specs (at 45,000 ft)
 temp_cruise = 390  # in deg R
@@ -17,8 +19,8 @@ dynamic_visc = 2.969 * 10 ** (-7)  # in slug/ft-s
 density_loiter = 5.87 * 10 ** (-4)
 
 # original plane specs
-R_sub = 900  # in mi
-R_super = 10  # in mi
+R_sub = 1000  # in mi
+R_super = 30  # in mi
 SFC = 0.9  # in 1/hr
 SFC_super = 1.5  # in 1/hr
 V_c = 600  # in mph
@@ -31,7 +33,11 @@ payload = 0  # in lbf
 e_0 = 0.8
 b_w = 24  # in ft
 S_wing = 166  # in ft^2
+
+# wing parameters
 c_l_max = 1.7  # from the airfoil plots
+xc_max = 0.83  # location of the maximum (x/c)
+tc = 0.14  # maximum thickness
 
 # calculated values
 gamma = 1.4
@@ -323,3 +329,53 @@ print("~~~~~~~~~~~~~~~~~~~~~~~")
 w_cruise = (W_supersonic + W_cruise) / 2
 w_loiter = (W_landing + W_loiter) / 2
 w_supersonic = (W_supersonic + W_combat) / 2
+
+cl, cl_super, Re, M_subsonic = lift_coeff_estimate(
+    V_c=V_c,
+    W_cruise=w_cruise,
+    W_supersonic=w_supersonic,
+    bw=b_w,
+    S_wing=S_wing,
+    cruise_density=density_cruise,
+    V_super=V_super,
+    dynamic_visc=dynamic_visc,
+    temp_cruise=temp_cruise,
+)
+
+print("After the refined weight estimate:")
+print("The required coefficient of lift at cruise is: ", cl)
+print("The required coefficient of lift at supersonic dash is: ", cl_super)
+print("The Reynolds number at cruise is: ", Re)
+print("The Mach number at cruise is: ", M_subsonic)
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+
+fuselage_length = np.round(a * takeoff_weight**c, decimals=0)
+print("The new fuselage length is: ", fuselage_length)
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+
+v_star = propulsion_analysis(
+    c_l_max=c_l_max,
+    w_landing=W_landing,
+    cruise_density=density_cruise,
+    S_wing=S_wing,
+    V_c=V_c,
+    AR_wing=AR_wing,
+    w_cruise=w_cruise,
+    takeoff_weight=takeoff_weight,
+    cruise_temp=temp_cruise,
+    Re_wing=Re,
+    xc_max=xc_max,
+    tc=tc,
+    sweep_angle=sweep_angle,
+    c_h_tail=avg_chord_h,
+    c_v_tail=avg_chord_v,
+    S_h_tail=S_h,
+    S_v_tail=S_v,
+    fuselage_length=fuselage_length,
+    M_subsonic=M_subsonic,
+    dynamic_visc=dynamic_visc,
+)
+
+print("V* is: ", v_star)
