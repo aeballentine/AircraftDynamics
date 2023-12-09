@@ -129,7 +129,7 @@ def propulsion_analysis(
             D = D_a[-1 - i]
             err = thrust_cruise[-1 - i] - D_a[-1 - i]
             i += 1
-        print("V*: ", velocity[-1 - i])
+        # print("V*: ", velocity[-1 - i])
         return velocity[-1 - i]
 
     v_star = findIntersection(D_a, thrust_cruise)

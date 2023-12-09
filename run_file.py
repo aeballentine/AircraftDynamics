@@ -20,7 +20,7 @@ density_loiter = 5.87 * 10 ** (-4)
 
 # original plane specs
 R_sub = 1000  # in mi
-R_super = 30  # in mi
+R_super = 15  # in mi
 SFC = 0.9  # in 1/hr
 SFC_super = 1.5  # in 1/hr
 V_c = 600  # in mph
@@ -197,35 +197,75 @@ print("Moment arm - ", Y_h)
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
-(
-    wing_loading_uncorrected,
-    wing_loading_corrected,
-    wing_areas,
-    thrust_to_weight,
-    thrust,
-) = wing_loading(
-    W0=takeoff_weight,
-    cruise_density=density_cruise,
-    loiter_density=density_loiter,
-    temp_cruise=temp_cruise,
-    V_c=V_c,
-    M_super=M_super,
-    M_sub=M_subsonic,
-    e_0=0.8,
-    b_w=b_w,
-    S_w=S_wing,
-    takeoff_weight=takeoff_weight,
-    w_cruise=w_cruise,
-    w_loiter=w_loiter,
-    w_supersonic=w_supersonic,
-    w_landing=W_landing,
-    c_l_max=c_l_max,
-)
+# added a for loop to make these values converge a little nicer:
+err = 1
+takeoff_weight_initial = takeoff_weight
+while err > 0.1:
+    (
+        wing_loading_uncorrected,
+        wing_loading_corrected,
+        wing_areas,
+        thrust_to_weight,
+        thrust,
+    ) = wing_loading(
+        W0=takeoff_weight,
+        cruise_density=density_cruise,
+        loiter_density=density_loiter,
+        temp_cruise=temp_cruise,
+        V_c=V_c,
+        M_super=M_super,
+        M_sub=M_subsonic,
+        e_0=0.8,
+        b_w=b_w,
+        S_w=S_wing,
+        takeoff_weight=takeoff_weight,
+        w_cruise=w_cruise,
+        w_loiter=w_loiter,
+        w_supersonic=w_supersonic,
+        w_landing=W_landing,
+        c_l_max=c_l_max,
+    )
 
-# todo: know this is static
-refined_wing_area = wing_areas[1]
+    # todo: know this is static
+    refined_wing_area = wing_areas[1]
 
-# takeoff, cruise, supersonic, loiter, landing
+    AR_wing = b_w**2 / refined_wing_area
+    takeoff_weight_old = takeoff_weight
+    wing_loading_refined_weight = (
+        wing_loading_corrected[0],
+        wing_loading_corrected[1],
+        wing_loading_corrected[2],
+        wing_loading_corrected[4],
+    )
+    (
+        iteration_table,
+        empty_weight,
+        intermediate_weights,
+    ) = refined_weight_estimate(
+        temp_cruise=temp_cruise,
+        R_sub=R_sub,
+        R_super=R_super,
+        SFC=SFC,
+        SFC_super=SFC_super,
+        V_c=V_c,
+        M_super=M_super,
+        combat_length=combat,
+        loiter_length=loiter,
+        num_crew=num_crew,
+        w_payload=payload,
+        L2D_sub=thrust_to_weight[1] ** (-1),
+        L2D_loiter=thrust_to_weight[3] ** (-1),
+        L2D_super=thrust_to_weight[2] ** (-1),
+        L2D_combat=thrust_to_weight[3] ** (-1),
+        T2W=thrust_to_weight[0],  # thrust to weight at takeoff
+        W2S=min(wing_loading_refined_weight),  # minimum value, disregarding loiter
+        AR=AR_wing,
+        M_subsonic=M_subsonic,
+    )
+
+    err = (takeoff_weight - takeoff_weight_old) / takeoff_weight_old
+
+
 print("Wing loading uncorrected at takeoff: ", wing_loading_uncorrected[0])
 print("Wing loading uncorrected at cruise: ", wing_loading_uncorrected[1])
 print("Wing loading uncorrected at supersonic dash: ", wing_loading_uncorrected[2])
@@ -268,40 +308,6 @@ print("Thrust in lbf at landing: ", thrust[4])
 
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
-
-AR_wing = b_w**2 / refined_wing_area
-takeoff_weight_old = takeoff_weight
-wing_loading_refined_weight = (
-    wing_loading_corrected[0],
-    wing_loading_corrected[1],
-    wing_loading_corrected[2],
-    wing_loading_corrected[4],
-)
-(
-    iteration_table,
-    empty_weight,
-    intermediate_weights,
-) = refined_weight_estimate(
-    temp_cruise=temp_cruise,
-    R_sub=R_sub,
-    R_super=R_super,
-    SFC=SFC,
-    SFC_super=SFC_super,
-    V_c=V_c,
-    M_super=M_super,
-    combat_length=combat,
-    loiter_length=loiter,
-    num_crew=num_crew,
-    w_payload=payload,
-    L2D_sub=thrust_to_weight[1] ** (-1),
-    L2D_loiter=thrust_to_weight[3] ** (-1),
-    L2D_super=thrust_to_weight[2] ** (-1),
-    L2D_combat=thrust_to_weight[3] ** (-1),
-    T2W=thrust_to_weight[0],  # thrust to weight at takeoff
-    W2S=min(wing_loading_refined_weight),  # minimum value, disregarding loiter
-    AR=AR_wing,
-    M_subsonic=M_subsonic,
-)
 
 (
     takeoff_weight,
@@ -320,7 +326,8 @@ print("The empty weight in lbf is: ", empty_weight)
 print(
     "The percent change in takeoff weight is: ",
     np.round(
-        (takeoff_weight - takeoff_weight_old) / takeoff_weight_old * 100, decimals=2
+        (takeoff_weight - takeoff_weight_initial) / takeoff_weight_initial * 100,
+        decimals=2,
     ),
 )
 
@@ -330,6 +337,7 @@ print("~~~~~~~~~~~~~~~~~~~~~~~")
 w_cruise = (W_supersonic + W_cruise) / 2
 w_loiter = (W_landing + W_loiter) / 2
 w_supersonic = (W_supersonic + W_combat) / 2
+
 
 cl, cl_super, Re, M_subsonic = lift_coeff_estimate(
     V_c=V_c,
@@ -348,85 +356,6 @@ print("The required coefficient of lift at cruise is: ", cl)
 print("The required coefficient of lift at supersonic dash is: ", cl_super)
 print("The Reynolds number at cruise is: ", Re)
 print("The Mach number at cruise is: ", M_subsonic)
-print("~~~~~~~~~~~~~~~~~~~~~~~")
-print("~~~~~~~~~~~~~~~~~~~~~~~")
-
-
-(
-    wing_loading_uncorrected,
-    wing_loading_corrected,
-    wing_areas,
-    thrust_to_weight,
-    thrust,
-) = wing_loading(
-    W0=takeoff_weight,
-    cruise_density=density_cruise,
-    loiter_density=density_loiter,
-    temp_cruise=temp_cruise,
-    V_c=V_c,
-    M_super=M_super,
-    M_sub=M_subsonic,
-    e_0=0.8,
-    b_w=b_w,
-    S_w=S_wing,
-    takeoff_weight=takeoff_weight,
-    w_cruise=w_cruise,
-    w_loiter=w_loiter,
-    w_supersonic=w_supersonic,
-    w_landing=W_landing,
-    c_l_max=c_l_max,
-)
-
-# todo: know this is static
-refined_wing_area = wing_areas[1]
-
-# takeoff, cruise, supersonic, loiter, landing
-print("Wing loading uncorrected at takeoff: ", wing_loading_uncorrected[0])
-print("Wing loading uncorrected at cruise: ", wing_loading_uncorrected[1])
-print("Wing loading uncorrected at supersonic dash: ", wing_loading_uncorrected[2])
-print("Wing loading uncorrected at loiter: ", wing_loading_uncorrected[3])
-print("Wing loading uncorrected at landing: ", wing_loading_uncorrected[4])
-
-print("~~~~~~~~~~~~~~~~~~~~~~~")
-
-print("Wing loading corrected at takeoff: ", wing_loading_corrected[0])
-print("Wing loading corrected at cruise: ", wing_loading_corrected[1])
-print("Wing loading corrected at supersonic dash: ", wing_loading_corrected[2])
-print("Wing loading corrected at loiter: ", wing_loading_corrected[3])
-print("Wing loading corrected at landing: ", wing_loading_corrected[4])
-
-print("~~~~~~~~~~~~~~~~~~~~~~~")
-
-print("List of new wing areas in ft^2: ", wing_areas)
-print("Refined wing area in ft^2: ", refined_wing_area)
-print(
-    "Percent change in wing area: ",
-    np.round((refined_wing_area - S_wing) / S_wing * 100, decimals=2),
-)
-S_wing = refined_wing_area
-
-print("~~~~~~~~~~~~~~~~~~~~~~~")
-
-print("Thrust to weight ratio at takeoff: ", thrust_to_weight[0])
-print("Thrust to weight ratio at cruise: ", thrust_to_weight[1])
-print("Thrust to weight ratio at supersonic dash: ", thrust_to_weight[2])
-print("Thrust to weight ratio at loiter: ", thrust_to_weight[3])
-print("Thrust to weight ratio at landing: ", thrust_to_weight[4])
-
-print("~~~~~~~~~~~~~~~~~~~~~~~")
-
-print("Thrust in lbf at takeoff: ", thrust[0])
-print("Thrust in lbf at cruise: ", thrust[1])
-print("Thrust in lbf at supersonic dash: ", thrust[2])
-print("Thrust in lbf at loiter: ", thrust[3])
-print("Thrust in lbf at landing: ", thrust[4])
-
-print("~~~~~~~~~~~~~~~~~~~~~~~")
-print("~~~~~~~~~~~~~~~~~~~~~~~")
-
-
-fuselage_length = np.round(a * takeoff_weight**c, decimals=0)
-print("The new fuselage length is: ", fuselage_length)
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
@@ -454,4 +383,4 @@ v_star = propulsion_analysis(
     cruise_thrust=thrust[1],
 )
 
-print("V* is: ", v_star)
+print("V* in ft/s is: ", v_star)
