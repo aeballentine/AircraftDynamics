@@ -15,16 +15,14 @@ def initial_wing_sizing(W0, M_subsonic):
     sweep_angle = 45  # in deg, assuming that maximum Mach is 1.25
 
     # chord calculations
-    c_tip = 3
-    c_root = 12.5
     taper_ratio = (
         0.45  # using Raymer, elliptical lift distribution, and the sweep angle
     )
-    avg_chord = (
-        (2 / 3) * c_root * (1 + taper_ratio + taper_ratio**2) / (taper_ratio + 1)
-    )
     c_root_new = 2 * S_new / (b_new * (1 + taper_ratio))
-    c_tip_new = taper_ratio * c_root
+    c_tip_new = taper_ratio * c_root_new
+    avg_chord = (
+        (2 / 3) * c_root_new * (1 + taper_ratio + taper_ratio**2) / (taper_ratio + 1)
+    )
     quarter_chord = avg_chord / 4
 
     # aerodynamic center to the mean chord
