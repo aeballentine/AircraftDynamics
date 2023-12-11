@@ -2,6 +2,7 @@ import numpy as np
 from scipy.optimize import fsolve
 
 
+
 def tail_sizing(
     S_wing,
     fuselage_length,
