@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
 
 # NOTE - update cruise weight after refined estimate
+# todo: supersonic wave drag
 
 
 def propulsion_analysis(

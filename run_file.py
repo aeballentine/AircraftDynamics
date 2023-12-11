@@ -465,5 +465,5 @@ x_np = neutral_point(
 
 print("The location of the neutral point is: ", x_np)
 
-static_margin = x_np - x_cg
+static_margin = (x_np - x_cg) / avg_chord
 print("The static margin is: ", static_margin)
