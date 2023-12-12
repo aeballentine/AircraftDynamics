@@ -7,6 +7,7 @@ from tail_sizing import *
 from aero_prop_analysis import *
 from static_stability import *
 from super_aero_prop_analysis import *
+from trim_analysis import *
 
 # todo-> questions: do we calculate W/S at stall, and if so, is that the lowest W/S value?
 # todo: fsolve to make tails areas work
@@ -388,6 +389,7 @@ v_star = propulsion_analysis(
     M_subsonic=M_subsonic,
     dynamic_visc=dynamic_visc,
     cruise_thrust=thrust[1],
+    M_super=M_super,
 )
 
 print("Subsonic V* in ft/s is: ", v_star)
@@ -478,7 +480,7 @@ x_np = neutral_point(
     Cl_alpha=lift_slope,
     AR_wing=AR_wing,
     sweep_angle=sweep_angle,
-    fuselage_diameter=Df,
+    fuselage_diameter=fuselage_diameter,
     fuselage_length=fuselage_length,
     fuselage_weight=fuselage_weight,
     c_root=c_root,
