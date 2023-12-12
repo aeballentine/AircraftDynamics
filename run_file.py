@@ -6,6 +6,7 @@ from initial_wing_sizing import *
 from tail_sizing import *
 from aero_prop_analysis import *
 from static_stability import *
+from super_aero_prop_analysis import *
 
 # todo-> questions: do we calculate W/S at stall, and if so, is that the lowest W/S value?
 # todo: fsolve to make tails areas work
@@ -389,9 +390,37 @@ v_star = propulsion_analysis(
     cruise_thrust=thrust[1],
 )
 
-print("V* in ft/s is: ", v_star)
+print("Subsonic V* in ft/s is: ", v_star)
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
+
+v_star_super = super_propulsion_analysis(
+    c_l_max=c_l_max,
+    w_landing=W_landing,
+    cruise_density=density_cruise,
+    S_wing=refined_wing_area,
+    V_c=V_c,
+    AR_wing=AR_wing,
+    w_cruise=w_cruise,
+    takeoff_weight=takeoff_weight,
+    cruise_temp=temp_cruise,
+    Re_wing=Re,
+    xc_max=xc_max,
+    tc=tc,
+    sweep_angle=sweep_angle,
+    c_h_tail=avg_chord_h,
+    c_v_tail=avg_chord_v,
+    S_h_tail=S_h,
+    S_v_tail=S_v,
+    fuselage_length=fuselage_length,
+    M_subsonic=M_subsonic,
+    dynamic_visc=dynamic_visc,
+    cruise_thrust=thrust[1],
+    thrust_supersonic=thrust[2],
+    M_super=M_super,
+    avg_chord=avg_chord,
+
+)
 
 fineness_ratio = 12  # based on pg 157
 Df = fuselage_length / fineness_ratio  # fuselage diameter - FIX
@@ -465,5 +494,5 @@ x_np = neutral_point(
 
 print("The location of the neutral point is: ", x_np)
 
-static_margin = (x_np - x_cg) / avg_chord
+static_margin = x_np - x_cg
 print("The static margin is: ", static_margin)
