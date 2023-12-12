@@ -109,7 +109,10 @@ def super_propulsion_analysis(
         C_D0_fuse = C_f_fuse * Ff_fuse * (S_wet_fuse / S_wing)
 
         # Wave drag
-        C_D0_wave = (((9*math.pi)/2)*(A_max/fuselage_length)**2)/S_wing #Raymer eqn 12.44
+        Dq_ratio_sears_hack = (((9*math.pi)/2)*(A_max/fuselage_length)**2) #Raymer eqn 12.44
+        Ewd = 2 # spec based on eqn 12.45 and subsequent text
+        Dq_ratio_wave = Dq_ratio_sears_hack*Ewd*(1-((0.386*(M_super-1.2)**0.57)*(1-((math.pi*sweep_angle**0.77)/100))))
+        C_D0_wave = Dq_ratio_wave / S_wing
 
         # AIRCRAFT
         C_D0_super = C_D0_wing + C_D0_HT + C_D0_VT + C_D0_fuse + C_D0_wave
@@ -121,11 +124,11 @@ def super_propulsion_analysis(
         D_super.append(D_aircraft)
         thrust_super.append(thrust_supersonic)  # cruise thrust from step 5
 
-    print("Supersonic thrust: ",thrust_supersonic)
-    print("Supersonic drag: ",D_super)
+    #print("Supersonic thrust: ",thrust_supersonic)
+    #print("Supersonic drag: ",D_super)
     # Plot drag vs. velocity
-    plt.plot(super_velocity, D_super, color="blue", label="Drag [lb]")
-    plt.plot(super_velocity, thrust_super, color="red", label="Supersonic Thrust [lb]")
+    plt.plot(super_velocity, D_super, color="green", label="Supersonic Drag [lb]")
+    plt.plot(super_velocity, thrust_super, color="orange", label="Supersonic Thrust [lb]")
     plt.title("Plot of Supersonic Aircraft Drag and Thrust vs. Flight Speed")
     plt.legend()
     plt.show()
