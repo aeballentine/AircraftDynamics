@@ -11,8 +11,6 @@ from trim_analysis import *
 from maneuver_analysis import *
 
 # todo-> questions: do we calculate W/S at stall, and if so, is that the lowest W/S value?
-# todo: fsolve to make tails areas work
-# todo: supersonic thrust to drag plot (12.4.2, 12.4.5, 12.5.9, and 12.5.10)
 
 # cruise altitude specs (at 45,000 ft)
 temp_cruise = 390  # in deg R
@@ -171,6 +169,7 @@ print("~~~~~~~~~~~~~~~~~~~~~~~")
     avg_chord_w=avg_chord,
     b_wing=b_w,
 )
+
 print("Vertical tail characteristics:")
 print(
     "Chord lengths: tip - ",
@@ -406,9 +405,7 @@ v_star_super = super_propulsion_analysis(
     V_c=V_c,
     AR_wing=AR_wing,
     w_cruise=w_cruise,
-    takeoff_weight=takeoff_weight,
     cruise_temp=temp_cruise,
-    Re_wing=Re,
     xc_max=xc_max,
     tc=tc,
     sweep_angle=sweep_angle,
@@ -417,15 +414,13 @@ v_star_super = super_propulsion_analysis(
     S_h_tail=S_h,
     S_v_tail=S_v,
     fuselage_length=fuselage_length,
-    M_subsonic=M_subsonic,
     dynamic_visc=dynamic_visc,
-    cruise_thrust=thrust[1],
     thrust_supersonic=thrust[2],
     M_super=M_super,
     avg_chord=avg_chord,
 )
 
-#print("Supersonic V* in ft/s is: ", v_star_super)
+# print("Supersonic V* in ft/s is: ", v_star_super)
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
@@ -443,7 +438,16 @@ S_fuselage = (math.pi * fuselage_length * fuselage_diameter) + S_wet_noseandback
 
 W_fuel = fuel_fraction_cruise * takeoff_weight  # todo: this needs to be changed
 
-x_cg = center_of_gravity(
+# change some of the sizing parameters:
+wing_location = 7
+new_area = S_h + 20
+tail_end_h = 0
+new_span = b_h
+[S_h, b_h, avg_chord_h, c_root_h, c_tip_h, quarter_chord_h, AR_h] = h_tail_resizing(
+    S=new_area, b=new_span, taper_ratio=taper_ratio_h
+)
+
+x_cg, weights_buildup = center_of_gravity(
     S_v_tail=S_v,
     S_h_tail=S_h,
     S_wing=S_wing,
@@ -469,6 +473,7 @@ x_cg = center_of_gravity(
     Y_h_tail=Y_h,
 )
 print("The location of the center of gravity from the nose is: ", x_cg)
+print(weights_buildup)
 wing_25 = np.round(
     wing_location + Y_wing * np.tan(sweep_angle) + quarter_chord, decimals=2
 )
@@ -505,8 +510,33 @@ x_np = neutral_point(
 
 print("The location of the neutral point is: ", x_np)
 
-static_margin = x_np - x_cg
-print("The static margin is: ", static_margin)
+static_margin = (x_np - x_cg) / avg_chord
+print("The static margin is: ", np.round(static_margin, decimals=4))
+
+x_np_super = neutral_point_super(
+    quarter_chord=quarter_chord,
+    S_wing=S_wing,
+    quarter_c_h=quarter_chord_h,
+    S_h_tail=S_h,
+    AR_wing=AR_wing,
+    sweep_angle=sweep_angle,
+    fuselage_length=fuselage_length,
+    c_root_h=c_root_h,
+    wing_location=wing_location,
+    Y_wing=Y_wing,
+    h_tail_end=tail_end_h,
+    Y_h_tail=Y_h,
+    M_super=M_super,
+    avg_chord=avg_chord,
+    avg_chord_h=avg_chord_h,
+)
+
+print("The location of the supersonic neutral point is: ", x_np_super)
+static_margin_super = (x_np_super - x_cg) / avg_chord
+print("The static margin is: ", np.round(static_margin_super, decimals=4))
+
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 trim_analysis(
     M_subsonic=M_subsonic,
@@ -532,6 +562,9 @@ trim_analysis(
     c_h_tail=avg_chord_h,
     Cm_airfoil=cm_wing,
 )
+
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 turn_plot = man_analysis(
     V_c=V_c,

@@ -82,7 +82,50 @@ def center_of_gravity(
         + fuel_weight
     )
 
-    return np.round(x_cg, decimals=2)
+    weights_buildup = dict(
+        {
+            "Vertical tail location, weight": np.round(
+                np.array([v_tail_location, v_tail_weight]), decimals=2
+            ),
+            "Horizontal tail location, weight": np.round(
+                np.array([h_tail_location, h_tail_weight]), decimals=2
+            ),
+            "Wing location, weight": np.round(
+                np.array([wing_location, wing_weight]), decimals=2
+            ),
+            "Landing gear location front, weight": np.round(
+                np.array([1, 0.15 * landing_weight]), decimals=2
+            ),
+            "Landing gear location back, weight": np.round(
+                np.array([landing_location, 0.85 * landing_weight]), decimals=2
+            ),
+            "Fuselage location, weight": np.round(
+                np.array([fuselage_location, fuselage_weight]), decimals=2
+            ),
+            "Engine location, weight": np.round(
+                np.array([engine_location, engine_weight]), decimals=2
+            ),
+            "Fuel location, weight": np.round(
+                np.array([fuel_location, fuel_weight]), decimals=2
+            ),
+            "All else location, weight": np.round(
+                np.array([all_else_location, all_else_weight]), decimals=2
+            ),
+            "Total weight": np.round(
+                wing_weight
+                + v_tail_weight
+                + h_tail_weight
+                + fuselage_weight
+                + landing_weight
+                + engine_weight
+                + fuel_weight
+                + all_else_weight
+            ),
+            "Neutral point location": np.round(x_cg, decimals=2),
+        }
+    )
+
+    return [np.round(x_cg, decimals=2), weights_buildup]
 
 
 # subsonic neutral point:
@@ -148,7 +191,7 @@ def neutral_point(
 
     eta_h = Cl_alpha_h / (2 * np.pi / beta)
     S_exposed_h = (
-        S_h_tail - 0.25 * fuselage_diameter * c_root_h
+        S_h_tail - 0.2 * fuselage_diameter * c_root_h
     )  # todo: check the 0.25 value
     CL_alpha_h_tail = (
         2
@@ -165,8 +208,56 @@ def neutral_point(
         )
     )
 
-    K_fus = 0.005  # using Fig. 16.14 and assuming root quarter chord is about 20% of the fuselage length
-    # C_m_fuselage = K_fus * fuselage_weight**2 * fuselage_length / (avg_chord * S_wing)
+    n_h = 0.9  # assuming that the tail is fully out of the prop wash, Raymer pg. 606
+
+    de_da = 1.62 * CL_alpha_wing / (np.pi * AR_wing)
+    da_h_da = 1 - de_da
+
+    x_np = (
+        CL_alpha_wing * x_ac_wing
+        + n_h * (S_h_tail / S_wing) * CL_alpha_h_tail * da_h_da * x_ac_h
+    ) / (CL_alpha_wing + n_h * (S_h_tail / S_wing) * CL_alpha_h_tail * da_h_da)
+
+    return np.round(x_np, decimals=2)
+
+
+def neutral_point_super(
+    quarter_chord,
+    S_wing,
+    M_super,
+    quarter_c_h,
+    S_h_tail,
+    AR_wing,
+    sweep_angle,
+    fuselage_length,
+    c_root_h,
+    wing_location,
+    Y_wing,
+    h_tail_end,
+    Y_h_tail,
+    avg_chord,
+    avg_chord_h,
+):
+    sweep_angle = sweep_angle * np.pi / 180
+
+    # shift in aerodynamic center as Mach number increases (transsonic):
+    delta_xac = 0.112 - 0.004 * M_super
+
+    x_ac_wing = quarter_chord + delta_xac * np.sqrt(S_wing)
+    x_ac_h = quarter_c_h + delta_xac * np.sqrt(S_h_tail)
+    x_ac_wing = wing_location + Y_wing * np.tan(sweep_angle) + x_ac_wing
+    x_ac_h = (
+        fuselage_length
+        - h_tail_end
+        - c_root_h
+        + Y_h_tail * np.tan(sweep_angle)
+        + x_ac_h
+    )
+
+    # lift curve slopes (pg. 400)
+    beta = np.sqrt(M_super**2 - 1)
+    CL_alpha_wing = 4 / beta
+    CL_alpha_h_tail = CL_alpha_wing
 
     n_h = 0.9  # assuming that the tail is fully out of the prop wash, Raymer pg. 606
 
@@ -175,8 +266,7 @@ def neutral_point(
 
     x_np = (
         CL_alpha_wing * x_ac_wing
-        # - C_m_fuselage     # <- this is way too large compared to the rest of the terms
         + n_h * (S_h_tail / S_wing) * CL_alpha_h_tail * da_h_da * x_ac_h
     ) / (CL_alpha_wing + n_h * (S_h_tail / S_wing) * CL_alpha_h_tail * da_h_da)
 
-    return x_np
+    return np.round(x_np, decimals=2)

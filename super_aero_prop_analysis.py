@@ -1,10 +1,6 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import fsolve
-
-# NOTE - update cruise weight after refined estimate
-# todo: supersonic wave drag
 
 
 def super_propulsion_analysis(
@@ -28,10 +24,6 @@ def super_propulsion_analysis(
     M_super,
     thrust_supersonic,
     avg_chord,
-    takeoff_weight,
-    Re_wing,
-    M_subsonic,
-    cruise_thrust,
 ):
     # Define stall speed and cruise speed, conditions
     V_stall = round(
@@ -153,11 +145,11 @@ def super_propulsion_analysis(
     )
     plt.title("Plot of Aircraft Drag and Thrust vs. Flight Speed")
     plt.legend()
-    plt.show()
+    # plt.show()
 
     # print("supersonic drag at supersonic M: ", D_super(1210))
     # Print V star supersonic
-    #def findIntersection(D_super, thrust_super):
+    # def findIntersection(D_super, thrust_super):
     #    i = 0
     #    err = -1
     #    while err < 0:
@@ -167,6 +159,6 @@ def super_propulsion_analysis(
     #   print("V*: ", velocity[-1 - i])
     #    return super_velocity[-1 - i]
 
-    #_star_super = findIntersection(D_super, thrust_super)
+    # _star_super = findIntersection(D_super, thrust_super)
 
-    #return v_star_super
+    # return v_star_super

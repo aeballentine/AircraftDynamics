@@ -1,7 +1,6 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import fsolve
 
 # NOTE - update cruise weight after refined estimate
 # todo: supersonic wave drag
@@ -42,7 +41,7 @@ def propulsion_analysis(
     gamma = 1.4
     gas_constant = 1716  # ft-lbf/slug-R
     # mu_cruise = 2.969 * 10 ** (-7)  # / (4.62 * 10 ** (-4))
-    V_super = M_super*math.sqrt(gamma*gas_constant*cruise_temp)
+    V_super = M_super * math.sqrt(gamma * gas_constant * cruise_temp)
     sweep_angle = sweep_angle * np.pi / 180  # conversion to radians
     fineness_ratio = 12  # based on pg 157
     Df = fuselage_length / fineness_ratio  # fuselage diameter - FIX
@@ -108,9 +107,9 @@ def propulsion_analysis(
 
         # AIRCRAFT
         C_D0_aircraft = C_D0_wing + C_D0_HT + C_D0_VT + C_D0_fuse
-        #print("CD_0 sub: ", C_D0_aircraft)
+        # print("CD_0 sub: ", C_D0_aircraft)
         C_D_aircraft = C_D0_aircraft + C_D_induced
-        #print("Subsonic C_D_aircraft: ", C_D_aircraft)
+        # print("Subsonic C_D_aircraft: ", C_D_aircraft)
         D_aircraft = C_D_aircraft * q_cruise * S_wing
         # print("Aircraft drag D_a", D_aircraft, "lb")
         velocity.append(V)
@@ -122,7 +121,7 @@ def propulsion_analysis(
     plt.plot(velocity, thrust_cruise, color="red", label="Cruise Thrust [lb]")
     plt.title("Plot of Aircraft Drag and Thrust vs. Flight Speed")
     plt.legend()
-    #plt.show()
+    # plt.show()
 
     # Print V star
     def findIntersection(D_a, thrust_cruise):

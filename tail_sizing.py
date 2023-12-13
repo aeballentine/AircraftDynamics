@@ -2,7 +2,6 @@ import numpy as np
 from scipy.optimize import fsolve
 
 
-
 def tail_sizing(
     S_wing,
     fuselage_length,
@@ -166,4 +165,18 @@ def tail_sizing(
             ]
         ),
         decimals=2,
+    )
+
+
+def h_tail_resizing(S, b, taper_ratio):
+    S_h = S
+    b_h = b
+    avg_chord = S_h / b_h
+    quarter_chord = avg_chord / 4
+    c_root = 2 * S_h / (b_h * (1 + taper_ratio))
+    c_tip = taper_ratio * c_root
+    AR_h = b_h**2 / S_h
+
+    return np.round(
+        np.array([S_h, b_h, avg_chord, c_root, c_tip, quarter_chord, AR_h]), decimals=2
     )
