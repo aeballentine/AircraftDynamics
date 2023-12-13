@@ -129,7 +129,7 @@ def super_propulsion_analysis(
     # Plot drag vs. velocity
     plt.plot(super_velocity, D_super, color="green", label="Supersonic Drag [lb]")
     plt.plot(super_velocity, thrust_super, color="orange", label="Supersonic Thrust [lb]")
-    plt.title("Plot of Supersonic Aircraft Drag and Thrust vs. Flight Speed")
+    plt.title("Plot of Aircraft Drag and Thrust vs. Flight Speed")
     plt.legend()
     plt.show()
 
@@ -141,7 +141,7 @@ def super_propulsion_analysis(
             D = D_super[-1 - i]
             err = thrust_super[-1 - i] - D_super[-1 - i]
             i += 1
-        # print("Supersonic V*: ", super_velocity[-1 - i])
+        # print("V*: ", velocity[-1 - i])
         return super_velocity[-1 - i]
 
     v_star_super = findIntersection(D_super, thrust_super)
