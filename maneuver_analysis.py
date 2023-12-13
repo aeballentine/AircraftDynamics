@@ -1,36 +1,17 @@
 import math
+import matplotlib.pyplot as plt
 
 def man_analysis(
-    M_subsonic,
     V_c,
-    Cl_alpha,
-    S_wing,
-    fuselage_diameter,
-    c_root,
-    b_w,
-    AR_wing,
-    sweep_angle,
-    c_root_h,
-    S_h_tail,
-    AR_h_tail,
-    Cl_alpha_h,
-    S_h,
-    alpha,
-    wing_location,
-    Y_wing,
-    avg_chord,
-    quarter_chord,
-    quarter_c_h,
-    fuselage_length,
-    h_tail_end,
-    Y_h_tail,
-    c_h_tail,
-    V_stall,
-    thrust_weight_TO,
     W_climb,
-    g,
+    w_landing,
+    cruise_density,
+    S_wing,
+    c_l_max,
+    thrust_weight_TO,
 ):
     # Climb T/W
+    V_stall = round(math.sqrt(2 * w_landing / (cruise_density * S_wing * c_l_max)))
     lift_drag_TO = (thrust_weight_TO)**(-1)
     V_TO = 1.2 * V_stall
     #V_v = V_TO * math.sin(climb_angle)
@@ -40,8 +21,24 @@ def man_analysis(
     thrust_climb = thrust_weight_climb * W_climb
     print("Thrust at climb: ", thrust_climb)
 
-    # Level turn analysis: turn rate, turn radius
-    load_factor =
-    turn_rate = (g*math.sqrt(load_factor**2-1))/V_TO
-    turn_radius = (V_TO**2)/(g*math.sqrt(load_factor**2-1))
+    # Turn rate and turn radius
+    velocity = []
+    TRate = []
+    TRadius = []
+    for V in range(V_stall, round(1.2 * V_c) + 1):
+        # Level turn analysis: turn rate, turn radius
+        g = 32.2
+        load_factor = 8 * g # from structural analysis
+        turn_rate = (g*math.sqrt((load_factor**2)-1))/V
+        turn_radius = (V**2)/(g*math.sqrt(load_factor**2-1))
+        velocity.append(V)
+        TRate.append(turn_rate)
+        TRadius.append(turn_radius)
+
+    # Plot
+    plt.plot(velocity, TRate, color="blue", label="Turn Rate [deg/s]")
+    plt.plot(velocity, TRadius, color="red", label="Turn Radius [ft]")
+    plt.title("Plot of Turn Rate and Turn Radius vs. Flight Speed")
+    plt.legend()
+    plt.show()
 

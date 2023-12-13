@@ -134,8 +134,12 @@ def super_propulsion_analysis(
         super_velocity.append(V)
         D_super.append(D_aircraft)
         thrust_super.append(thrust_supersonic)  # cruise thrust from step 5
+
+        # If statement below used to find supersonic drag at supersonic V, then used to adjust
+        # supersonic thrust accordingly - more on this in report
+        # Supersonic thrust = 1210.91
         if V == 1210:
-            # print("Drag at supersonic V: ", D_super[len(D_super)-1])
+            print("Supersonic V*: ", V)
             print("Drag at supersonic V: ", D_aircraft)
         else:
             pass
@@ -153,16 +157,16 @@ def super_propulsion_analysis(
 
     # print("supersonic drag at supersonic M: ", D_super(1210))
     # Print V star supersonic
-    def findIntersection(D_super, thrust_super):
-        i = 0
-        err = -1
-        while err < 0:
-            D = D_super[-1 - i]
-            err = thrust_super[-1 - i] - D_super[-1 - i]
-            i += 1
-        # print("V*: ", velocity[-1 - i])
-        return super_velocity[-1 - i]
+    #def findIntersection(D_super, thrust_super):
+    #    i = 0
+    #    err = -1
+    #    while err < 0:
+    #        D = D_super[-1 - i]
+    #        err = thrust_super[-1 - i] - D_super[-1 - i]
+    #        i += 1
+    #   print("V*: ", velocity[-1 - i])
+    #    return super_velocity[-1 - i]
 
-    v_star_super = findIntersection(D_super, thrust_super)
+    #_star_super = findIntersection(D_super, thrust_super)
 
-    return v_star_super
+    #return v_star_super

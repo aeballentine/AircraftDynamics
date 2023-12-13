@@ -8,8 +8,7 @@ from aero_prop_analysis import *
 from static_stability import *
 from super_aero_prop_analysis import *
 from trim_analysis import *
-
-# from trim_analysis import *
+from maneuver_analysis import *
 
 # todo-> questions: do we calculate W/S at stall, and if so, is that the lowest W/S value?
 # todo: fsolve to make tails areas work
@@ -426,7 +425,7 @@ v_star_super = super_propulsion_analysis(
     avg_chord=avg_chord,
 )
 
-print("Supersonic V* in ft/s is: ", v_star_super)
+#print("Supersonic V* in ft/s is: ", v_star_super)
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
@@ -532,4 +531,14 @@ trim_analysis(
     Y_h_tail=Y_h,
     c_h_tail=avg_chord_h,
     Cm_airfoil=cm_wing,
+)
+
+turn_plot = man_analysis(
+    V_c=V_c,
+    w_landing=W_landing,
+    cruise_density=density_cruise,
+    thrust_weight_TO=thrust_to_weight[0],
+    W_climb=W_climb,
+    S_wing=S_wing,
+    c_l_max=c_l_max,
 )
