@@ -14,6 +14,7 @@ def propulsion_analysis(
     S_wing,
     V_c,
     AR_wing,
+    M_super,
     w_cruise,
     takeoff_weight,
     cruise_temp,
@@ -41,6 +42,7 @@ def propulsion_analysis(
     gamma = 1.4
     gas_constant = 1716  # ft-lbf/slug-R
     # mu_cruise = 2.969 * 10 ** (-7)  # / (4.62 * 10 ** (-4))
+    V_super = M_super*math.sqrt(gamma*gas_constant*cruise_temp)
     sweep_angle = sweep_angle * np.pi / 180  # conversion to radians
     fineness_ratio = 12  # based on pg 157
     Df = fuselage_length / fineness_ratio  # fuselage diameter - FIX
@@ -51,7 +53,7 @@ def propulsion_analysis(
     velocity = []
     D_a = []
     thrust_cruise = []
-    for V in range(V_stall, round(1.2 * V_c_ft) + 1):
+    for V in range(V_stall, round(1.2 * V_super) + 1):
         q_cruise = 0.5 * cruise_density * (V**2)
         C_L_aircraft = w_cruise / (q_cruise * S_wing)
         C_D_induced = (C_L_aircraft**2) / (math.pi * AR_wing * e_0)
@@ -116,7 +118,7 @@ def propulsion_analysis(
         thrust_cruise.append(cruise_thrust)  # cruise thrust from step 5
 
     # Plot drag vs. velocity
-    plt.plot(velocity, D_a, color="blue", label="Drag [lb]")
+    plt.plot(velocity, D_a, color="blue", label="Subsonic Drag [lb]")
     plt.plot(velocity, thrust_cruise, color="red", label="Cruise Thrust [lb]")
     plt.title("Plot of Aircraft Drag and Thrust vs. Flight Speed")
     plt.legend()

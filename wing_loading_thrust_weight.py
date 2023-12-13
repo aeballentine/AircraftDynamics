@@ -143,7 +143,8 @@ def wing_loading(
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # THRUST-WEIGHT RATIO - COMBAT/SUPERSONIC
-    thrust_weight_supersonic = 0.514 * M_super**0.141
+    thrust_weight_supersonic = ((q_super*C_D0)/wing_loading_supersonic_uncorr)+(
+            wing_loading_supersonic_uncorr/(q_super*math.pi*AR_w*e_0))
     thrust_supersonic = thrust_weight_supersonic * w_supersonic
 
     thrust_to_weight = np.array(
