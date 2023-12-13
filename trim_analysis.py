@@ -25,6 +25,7 @@ def trim_analysis(
     Y_h_tail,
     c_h_tail,
     Cm_airfoil,
+    tc,
 ):
     alpha_list = []
     CL_list = []
@@ -35,7 +36,8 @@ def trim_analysis(
             alpha_list.append(alpha)
             beta = np.sqrt(1 - M_subsonic**2)
             eta = Cl_alpha / (2 * np.pi / beta)
-            S_exposed = S_wing - fuselage_diameter * c_root
+            S_wet = S_wing - fuselage_diameter * c_root
+            S_exposed = S_wet / (1.977 + (0.52*tc))
             d = fuselage_diameter
             F = 1.07 * (1 + d / b_w) ** 2
             CL_alpha_wing = (
@@ -139,4 +141,4 @@ def trim_analysis(
     # plt.xlim([-1, 1])
     # plt.ylim([-0.1, 0.1])
 
-    # plt.show()
+    plt.show()
