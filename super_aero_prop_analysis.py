@@ -153,7 +153,7 @@ def super_propulsion_analysis(
     #        D = D_super[-1 - i]
     #        err = thrust_super[-1 - i] - D_super[-1 - i]
     #        i += 1
-    #    print("V*: ", velocity[-1 - i])
+    #   print("V*: ", velocity[-1 - i])
     #    return super_velocity[-1 - i]
 
     #_star_super = findIntersection(D_super, thrust_super)
