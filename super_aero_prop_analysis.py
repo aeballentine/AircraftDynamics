@@ -128,7 +128,6 @@ def super_propulsion_analysis(
         # supersonic thrust accordingly - more on this in report
         # Supersonic thrust = 1210.91
         if V == 1210:
-            #print("Drag at supersonic V: ", D_super[len(D_super)-1])
             print("Drag at supersonic V: ", D_aircraft)
         else:
             pass
