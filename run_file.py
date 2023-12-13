@@ -7,7 +7,7 @@ from tail_sizing import *
 from aero_prop_analysis import *
 from static_stability import *
 from super_aero_prop_analysis import *
-from trim_analysis import *
+#from trim_analysis import *
 
 # todo-> questions: do we calculate W/S at stall, and if so, is that the lowest W/S value?
 # todo: fsolve to make tails areas work
@@ -423,6 +423,10 @@ v_star_super = super_propulsion_analysis(
     avg_chord=avg_chord,
 
 )
+
+print("Supersonic V* in ft/s is: ", v_star_super)
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 fineness_ratio = 12  # based on pg 157
 Df = fuselage_length / fineness_ratio  # fuselage diameter - FIX
