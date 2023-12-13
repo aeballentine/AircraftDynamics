@@ -116,13 +116,20 @@ def super_propulsion_analysis(
 
         # AIRCRAFT
         C_D0_super = C_D0_wing + C_D0_HT + C_D0_VT + C_D0_fuse + C_D0_wave
-        # print("CD_0: ", C_D0_super)
+        #print("CD_0 super: ", C_D0_super)
         C_D_super = C_D0_super + C_D_induced
-        # print("Supersonic drag coefficient C_D_super: ", C_D_super)
+        #print("C_D_super: ", C_D_super)
         D_aircraft = C_D_super * q_super * S_wing
         super_velocity.append(V)
         D_super.append(D_aircraft)
         thrust_super.append(thrust_supersonic)  # cruise thrust from step 5
+        if V == 1210:
+            #print("Drag at supersonic V: ", D_super[len(D_super)-1])
+            print("Drag at supersonic V: ", D_super[1210])
+        else:
+            pass
+
+
 
     #print("Supersonic thrust: ",thrust_supersonic)
     #print("Supersonic drag: ",D_super)
@@ -133,6 +140,7 @@ def super_propulsion_analysis(
     plt.legend()
     plt.show()
 
+    #print("supersonic drag at supersonic M: ", D_super(1210))
     # Print V star supersonic
     def findIntersection(D_super, thrust_super):
         i = 0

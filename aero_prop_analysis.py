@@ -108,9 +108,9 @@ def propulsion_analysis(
 
         # AIRCRAFT
         C_D0_aircraft = C_D0_wing + C_D0_HT + C_D0_VT + C_D0_fuse
-        # print("CD_0: ", C_D0_aircraft)
+        #print("CD_0 sub: ", C_D0_aircraft)
         C_D_aircraft = C_D0_aircraft + C_D_induced
-        # print("Aircraft drag coefficient C_D_aircraft: ", C_D_aircraft)
+        #print("Subsonic C_D_aircraft: ", C_D_aircraft)
         D_aircraft = C_D_aircraft * q_cruise * S_wing
         # print("Aircraft drag D_a", D_aircraft, "lb")
         velocity.append(V)
@@ -122,7 +122,7 @@ def propulsion_analysis(
     plt.plot(velocity, thrust_cruise, color="red", label="Cruise Thrust [lb]")
     plt.title("Plot of Aircraft Drag and Thrust vs. Flight Speed")
     plt.legend()
-    # plt.show()
+    #plt.show()
 
     # Print V star
     def findIntersection(D_a, thrust_cruise):
