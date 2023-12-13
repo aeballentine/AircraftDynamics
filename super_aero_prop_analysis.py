@@ -32,7 +32,6 @@ def super_propulsion_analysis(
     Re_wing,
     M_subsonic,
     cruise_thrust,
-
 ):
     # Define stall speed and cruise speed, conditions
     V_stall = round(
@@ -46,10 +45,10 @@ def super_propulsion_analysis(
     sweep_angle = sweep_angle * np.pi / 180  # conversion to radians
     fineness_ratio = 12  # based on pg 157
     Df = fuselage_length / fineness_ratio  # fuselage diameter - FIX
-    A_max = math.pi*(Df/2)**2 #max cross sectional area of aircraft (eqn 12.44)
+    A_max = math.pi * (Df / 2) ** 2  # max cross sectional area of aircraft (eqn 12.44)
     h_nose = Df
     S_wet_noseandback = 2 * math.pi * (Df / 2) * math.sqrt((Df / 2) ** 2 + h_nose**2)
-    V_super = M_super*math.sqrt(gamma*gas_constant*cruise_temp)
+    V_super = M_super * math.sqrt(gamma * gas_constant * cruise_temp)
 
     # Solve for velocity range
     super_velocity = []
@@ -109,38 +108,50 @@ def super_propulsion_analysis(
         C_D0_fuse = C_f_fuse * Ff_fuse * (S_wet_fuse / S_wing)
 
         # Wave drag
-        Dq_ratio_sears_hack = (((9*math.pi)/2)*(A_max/fuselage_length)**2) #Raymer eqn 12.44
-        Ewd = 2 # spec based on eqn 12.45 and subsequent text
-        Dq_ratio_wave = Dq_ratio_sears_hack*Ewd*(1-((0.386*(M_super-1.2)**0.57)*(1-((math.pi*sweep_angle**0.77)/100))))
+        Dq_ratio_sears_hack = ((9 * math.pi) / 2) * (
+            A_max / fuselage_length
+        ) ** 2  # Raymer eqn 12.44
+        Ewd = 2  # spec based on eqn 12.45 and subsequent text
+        Dq_ratio_wave = (
+            Dq_ratio_sears_hack
+            * Ewd
+            * (
+                1
+                - (
+                    (0.386 * (M_super - 1.2) ** 0.57)
+                    * (1 - ((math.pi * sweep_angle**0.77) / 100))
+                )
+            )
+        )
         C_D0_wave = Dq_ratio_wave / S_wing
 
         # AIRCRAFT
         C_D0_super = C_D0_wing + C_D0_HT + C_D0_VT + C_D0_fuse + C_D0_wave
-        #print("CD_0 super: ", C_D0_super)
+        # print("CD_0 super: ", C_D0_super)
         C_D_super = C_D0_super + C_D_induced
-        #print("C_D_super: ", C_D_super)
+        # print("C_D_super: ", C_D_super)
         D_aircraft = C_D_super * q_super * S_wing
         super_velocity.append(V)
         D_super.append(D_aircraft)
         thrust_super.append(thrust_supersonic)  # cruise thrust from step 5
         if V == 1210:
-            #print("Drag at supersonic V: ", D_super[len(D_super)-1])
-            print("Drag at supersonic V: ", D_super[1210])
+            # print("Drag at supersonic V: ", D_super[len(D_super)-1])
+            print("Drag at supersonic V: ", D_aircraft)
         else:
             pass
 
-
-
-    #print("Supersonic thrust: ",thrust_supersonic)
-    #print("Supersonic drag: ",D_super)
+    # print("Supersonic thrust: ",thrust_supersonic)
+    # print("Supersonic drag: ",D_super)
     # Plot drag vs. velocity
     plt.plot(super_velocity, D_super, color="green", label="Supersonic Drag [lb]")
-    plt.plot(super_velocity, thrust_super, color="orange", label="Supersonic Thrust [lb]")
+    plt.plot(
+        super_velocity, thrust_super, color="orange", label="Supersonic Thrust [lb]"
+    )
     plt.title("Plot of Aircraft Drag and Thrust vs. Flight Speed")
     plt.legend()
     plt.show()
 
-    #print("supersonic drag at supersonic M: ", D_super(1210))
+    # print("supersonic drag at supersonic M: ", D_super(1210))
     # Print V star supersonic
     def findIntersection(D_super, thrust_super):
         i = 0

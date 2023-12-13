@@ -7,7 +7,9 @@ from tail_sizing import *
 from aero_prop_analysis import *
 from static_stability import *
 from super_aero_prop_analysis import *
-#from trim_analysis import *
+from trim_analysis import *
+
+# from trim_analysis import *
 
 # todo-> questions: do we calculate W/S at stall, and if so, is that the lowest W/S value?
 # todo: fsolve to make tails areas work
@@ -44,6 +46,7 @@ c_l_max = 1.7  # from the airfoil plots
 xc_max = 0.83  # location of the maximum (x/c)
 tc = 0.14  # maximum thickness
 lift_slope = 6.5  # lift/radians
+cm_wing = 0.087  # moment coefficient of the airfoil
 
 # calculated values
 gamma = 1.4
@@ -421,7 +424,6 @@ v_star_super = super_propulsion_analysis(
     thrust_supersonic=thrust[2],
     M_super=M_super,
     avg_chord=avg_chord,
-
 )
 
 print("Supersonic V* in ft/s is: ", v_star_super)
@@ -429,10 +431,15 @@ print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 fineness_ratio = 12  # based on pg 157
-Df = fuselage_length / fineness_ratio  # fuselage diameter - FIX
-h_nose = Df
-S_wet_noseandback = 2 * math.pi * (Df / 2) * math.sqrt((Df / 2) ** 2 + h_nose**2)
-S_fuselage = (math.pi * fuselage_length * Df) + S_wet_noseandback
+fuselage_diameter = fuselage_length / fineness_ratio  # fuselage diameter - FIX
+h_nose = fuselage_diameter
+S_wet_noseandback = (
+    2
+    * math.pi
+    * (fuselage_diameter / 2)
+    * math.sqrt((fuselage_diameter / 2) ** 2 + h_nose**2)
+)
+S_fuselage = (math.pi * fuselage_length * fuselage_diameter) + S_wet_noseandback
 
 
 W_fuel = fuel_fraction_cruise * takeoff_weight  # todo: this needs to be changed
@@ -473,7 +480,6 @@ print("25% of the wing to 35% of the wing is: ", wing_25, " - ", wing_35)
 
 
 fuselage_weight = 4.8 * S_fuselage
-fuselage_diameter = 3  # todo: check this value
 x_np = neutral_point(
     quarter_chord=quarter_chord,
     avg_chord=avg_chord,
@@ -502,3 +508,28 @@ print("The location of the neutral point is: ", x_np)
 
 static_margin = x_np - x_cg
 print("The static margin is: ", static_margin)
+
+trim_analysis(
+    M_subsonic=M_subsonic,
+    Cl_alpha=lift_slope,
+    S_wing=S_wing,
+    fuselage_diameter=fuselage_diameter,
+    c_root=c_root,
+    b_w=b_w,
+    AR_wing=AR_wing,
+    sweep_angle=sweep_angle,
+    c_root_h=c_root_h,
+    S_h_tail=S_h,
+    AR_h_tail=AR_h,
+    Cl_alpha_h=lift_slope_h,
+    wing_location=wing_location,
+    Y_wing=Y_wing,
+    avg_chord=avg_chord,
+    quarter_chord=quarter_chord,
+    quarter_c_h=quarter_chord_h,
+    fuselage_length=fuselage_length,
+    h_tail_end=tail_end_h,
+    Y_h_tail=Y_h,
+    c_h_tail=avg_chord_h,
+    Cm_airfoil=cm_wing,
+)
