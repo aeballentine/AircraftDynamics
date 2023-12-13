@@ -123,9 +123,13 @@ def super_propulsion_analysis(
         super_velocity.append(V)
         D_super.append(D_aircraft)
         thrust_super.append(thrust_supersonic)  # cruise thrust from step 5
+
+        # If statement below used to find supersonic drag at supersonic V, then used to adjust
+        # supersonic thrust accordingly - more on this in report
+        # Supersonic thrust = 1210.91
         if V == 1210:
             #print("Drag at supersonic V: ", D_super[len(D_super)-1])
-            print("Drag at supersonic V: ", D_super[1210])
+            print("Drag at supersonic V: ", D_aircraft)
         else:
             pass
 

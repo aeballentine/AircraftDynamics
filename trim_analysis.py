@@ -76,6 +76,7 @@ def trim_analysis(
 
     CL_wing = CL_alpha_wing * alpha
     CL_h = CL_alpha_h * (alpha + i_w)
+    Cm_wac =
     Cm_CG = (
         CL_wing * (x_cg_wing - x_ac_wing)
         + Cm_wac
