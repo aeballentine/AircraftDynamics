@@ -138,7 +138,7 @@ def trim_analysis(
     plt.xlabel("Coefficient of Lift")
     plt.ylabel("Coefficient of Moment")
 
-    # plt.xlim([-1, 1])
-    # plt.ylim([-0.1, 0.1])
+    #plt.xlim([-1, 1])
+    #plt.ylim([-0.1, 0.1])
 
-    plt.show()
+    #plt.show()
