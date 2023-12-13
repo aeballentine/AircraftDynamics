@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.optimize import minimize
+import matplotlib.pyplot as plt
 
 
 def trim_analysis(
@@ -30,8 +30,8 @@ def trim_analysis(
     CL_list = []
     Cm_list = []
     sweep_angle = sweep_angle * np.pi / 180  # conversion to radians
-    for alpha in [0, 5, 10]:
-        for i_h in []:
+    for alpha in (np.pi / 180) * np.array([-3, -2, -1, 0, 1, 2, 3]):
+        for i_h in (np.pi / 180) * np.array([-10, 0, 10]):
             alpha_list.append(alpha)
             beta = np.sqrt(1 - M_subsonic**2)
             eta = Cl_alpha / (2 * np.pi / beta)
@@ -113,5 +113,30 @@ def trim_analysis(
             CL_list.append(CL_total)
             Cm_list.append(Cm_CG)
 
-        print(CL_list)
-        print(Cm_list)
+    plt.plot(CL_list[0:2], Cm_list[0:2], color="black")
+    plt.plot(CL_list[3:5], Cm_list[3:5], color="blue")
+    plt.plot(CL_list[6:8], Cm_list[6:8], color="purple")
+
+    plt.plot(CL_list[9:11], Cm_list[9:11], color="green")
+    plt.plot(CL_list[12:14], Cm_list[12:14], color="orange")
+    plt.plot(CL_list[15:17], Cm_list[15:17], color="red")
+    plt.plot(CL_list[18:20], Cm_list[18:20], color="yellow")
+
+    plt.legend(
+        [
+            "Alpha = -3",
+            "Alpha = -2",
+            "Alpha = -1",
+            "Alpha = 0",
+            "Alpha = 1",
+            "Alpha = 2",
+            "Alpha = 3",
+        ]
+    )
+    plt.xlabel("Coefficient of Lift")
+    plt.ylabel("Coefficient of Moment")
+
+    # plt.xlim([-1, 1])
+    # plt.ylim([-0.1, 0.1])
+
+    plt.show()
