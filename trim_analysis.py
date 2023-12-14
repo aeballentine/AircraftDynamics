@@ -34,13 +34,14 @@ def trim_analysis(
     #lower_bound = round((np.pi/180)* (-3))
     #upper_bound = round((np.pi/180)*3)
     #for alpha_deg in (round(alpha_deg * 0.1, 1) for alpha_deg in range(-3, 3)):
+    S_wet = S_wing - fuselage_diameter * c_root
+    print("The wing wetted area is: ", S_wet)
     for alpha in (np.pi / 180) * np.array([-3, -2, -1, 0, 1, 2, 3]):
         for i_h in (np.pi / 180) * np.array([-10, 0, 10]):
             #alpha = alpha_deg * (np.pi/180)
             alpha_list.append(alpha)
             beta = np.sqrt(1 - M_subsonic**2)
             eta = Cl_alpha / (2 * np.pi / beta)
-            S_wet = S_wing - fuselage_diameter * c_root
             S_exposed = S_wet / (1.977 + (0.52*tc))
             d = fuselage_diameter
             F = 1.07 * (1 + d / b_w) ** 2

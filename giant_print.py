@@ -45,14 +45,17 @@ def final_characteristics(
     w_loading_takeoff,
     w_loading_supersonic,
     w_loading_loiter,
+    w_loading_landing,
     thrust_weight_cruise,
     thrust_weight_takeoff,
     thrust_weight_loiter,
     thrust_weight_supersonic,
+    thrust_weight_landing,
     cruise_thrust,
     thrust_supersonic,
     loiter_thrust,
     thrust_takeoff,
+    thrust_landing,
     x_cg,
     x_np,
     static_margin,
@@ -128,6 +131,7 @@ def final_characteristics(
     print("The wing loading at loiter is: ", w_loading_loiter, "lbf/ft^2")
     print("The wing loading at supersonic dash is: ", w_loading_supersonic, "lbf/ft^2")
     print("The wing loading at takeoff is: ", w_loading_takeoff, "lbf/ft^2")
+    print("The wing loading at landing is: ", w_loading_landing)
 
     print("~~~~~~~~~~~~~~~~~~~~~~~")
     print("THRUST TO WEIGHT")
@@ -137,6 +141,7 @@ def final_characteristics(
         "The thrust to weight ratio at supersonic dash is: ", thrust_weight_supersonic
     )
     print("The thrust to weight ratio at takeoff is: ", thrust_weight_takeoff)
+    print("The thrust to weight ratio at landing is: ", thrust_weight_landing)
 
     print("~~~~~~~~~~~~~~~~~~~~~~~")
     print("REQUIRED THRUST")
@@ -144,6 +149,7 @@ def final_characteristics(
     print("The required thrust at loiter is: ", loiter_thrust)
     print("The required thrust at supersonic dash is: ", thrust_supersonic)
     print("The required thrust at takeoff is: ", thrust_takeoff)
+    print("The required thrust at landing is: ", thrust_landing)
 
     print("~~~~~~~~~~~~~~~~~~~~~~~")
     print("STABILITY")
