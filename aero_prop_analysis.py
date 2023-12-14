@@ -47,12 +47,13 @@ def propulsion_analysis(
     Df = fuselage_length / fineness_ratio  # fuselage diameter - FIX
     h_nose = Df
     S_wet_noseandback = 2 * math.pi * (Df / 2) * math.sqrt((Df / 2) ** 2 + h_nose**2)
+    V_super_initial = 1 * math.sqrt(gamma * gas_constant * cruise_temp) # speed at M=1
 
     # Solve for velocity range
     velocity = []
     D_a = []
     thrust_cruise = []
-    for V in range(V_stall, round(1.2 * V_super) + 1):
+    for V in range(V_stall, round(V_super_initial)+1):
         q_cruise = 0.5 * cruise_density * (V**2)
         C_L_aircraft = w_cruise / (q_cruise * S_wing)
         C_D_induced = (C_L_aircraft**2) / (math.pi * AR_wing * e_0)
