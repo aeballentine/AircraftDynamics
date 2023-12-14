@@ -139,4 +139,4 @@ def trim_analysis(
     # plt.xlim([-1, 1])
     # plt.ylim([-0.1, 0.1])
 
-    # plt.show()
+    plt.show()

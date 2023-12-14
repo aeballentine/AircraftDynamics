@@ -133,6 +133,7 @@ def super_propulsion_analysis(
         if V == 1210:
             print("Supersonic V*: ", V)
             print("Drag at supersonic V: ", D_aircraft)
+            thrust_at_supersonic = D_aircraft
         else:
             pass
 
@@ -145,7 +146,7 @@ def super_propulsion_analysis(
     )
     plt.title("Plot of Aircraft Drag and Thrust vs. Flight Speed")
     plt.legend()
-    # plt.show()
+    plt.show()
 
     # print("supersonic drag at supersonic M: ", D_super(1210))
     # Print V star supersonic
@@ -161,4 +162,4 @@ def super_propulsion_analysis(
 
     # _star_super = findIntersection(D_super, thrust_super)
 
-    # return v_star_super
+    return np.round(thrust_at_supersonic, decimals=2)

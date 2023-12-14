@@ -9,6 +9,7 @@ from static_stability import *
 from super_aero_prop_analysis import *
 from trim_analysis import *
 from maneuver_analysis import *
+from giant_print import *
 
 # todo-> questions: do we calculate W/S at stall, and if so, is that the lowest W/S value?
 
@@ -16,6 +17,7 @@ from maneuver_analysis import *
 temp_cruise = 390  # in deg R
 density_cruise = 4.62 * 10 ** (-4)  # in slug/ft^3
 dynamic_visc = 2.969 * 10 ** (-7)  # in slug/ft-s
+cruise_alt = 45000  # in ft
 
 # loiter characteristics (at 40,000 ft)
 density_loiter = 5.87 * 10 ** (-4)
@@ -124,7 +126,18 @@ print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 (
-    [S_wing, b_w, AR_wing, avg_chord, sweep_angle, c_tip, c_root, quarter_chord, Y_wing]
+    [
+        S_wing,
+        b_w,
+        AR_wing,
+        avg_chord,
+        sweep_angle,
+        c_tip,
+        c_root,
+        quarter_chord,
+        Y_wing,
+        taper_ratio,
+    ]
 ) = initial_wing_sizing(takeoff_weight, M_subsonic)
 
 print("Adjusted for historic trends:")
@@ -368,7 +381,7 @@ print("The Mach number at cruise is: ", M_subsonic)
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
-v_star = propulsion_analysis(
+v_star, e_0, V_stall = propulsion_analysis(
     c_l_max=c_l_max,
     w_landing=W_landing,
     cruise_density=density_cruise,
@@ -397,7 +410,7 @@ print("Subsonic V* in ft/s is: ", v_star)
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
-v_star_super = super_propulsion_analysis(
+thrust_supersonic = super_propulsion_analysis(
     c_l_max=c_l_max,
     w_landing=W_landing,
     cruise_density=density_cruise,
@@ -419,6 +432,9 @@ v_star_super = super_propulsion_analysis(
     M_super=M_super,
     avg_chord=avg_chord,
 )
+
+thrust[2] = thrust_supersonic
+thrust_to_weight[2] = np.round(thrust_supersonic / w_supersonic, decimals=2)
 
 # print("Supersonic V* in ft/s is: ", v_star_super)
 print("~~~~~~~~~~~~~~~~~~~~~~~")
@@ -532,8 +548,8 @@ x_np_super = neutral_point_super(
 )
 
 print("The location of the supersonic neutral point is: ", x_np_super)
-static_margin_super = (x_np_super - x_cg) / avg_chord
-print("The static margin is: ", np.round(static_margin_super, decimals=4))
+static_margin_super = np.round((x_np_super - x_cg) / avg_chord, decimals=4)
+print("The calculated static margin is: ", np.round(static_margin_super, decimals=4))
 
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
@@ -566,7 +582,7 @@ trim_analysis(
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
-turn_plot = man_analysis(
+[thrust_weight_climb, thrust_climb] = man_analysis(
     V_c=V_c,
     w_landing=W_landing,
     cruise_density=density_cruise,
@@ -574,4 +590,67 @@ turn_plot = man_analysis(
     W_climb=W_climb,
     S_wing=S_wing,
     c_l_max=c_l_max,
+)
+
+
+final_characteristics(
+    R_sub=R_sub,
+    R_super=R_super,
+    cruise_alt=cruise_alt,
+    SFC=SFC,
+    SFC_super=SFC_super,
+    V_c=V_c,
+    M_super=M_super,
+    com=combat,
+    loiter=loiter,
+    payload=payload,
+    num_crew=num_crew,
+    takeoff_weight=takeoff_weight,
+    empty_weight=empty_weight,
+    e_0=e_0,
+    V_stall=V_stall,
+    AR_wing=AR_wing,
+    b_w=b_w,
+    S_w=S_wing,
+    taper_ratio_w=taper_ratio,
+    sweep_angle=sweep_angle,
+    root_chord=c_root,
+    tip_chord=c_tip,
+    avg_chord=avg_chord,
+    quarter_chord=quarter_chord,
+    AR_h=AR_h,
+    b_h=b_h,
+    S_h=S_h,
+    taper_ratio_h=taper_ratio_h,
+    c_root_h=c_root_h,
+    c_tip_h=c_tip_h,
+    c_avg_h=avg_chord_h,
+    quarter_c_h=quarter_chord_h,
+    AR_v=AR_v,
+    b_v=b_v,
+    S_v=S_v,
+    taper_ratio_v=taper_ratio_v,
+    c_root_v=c_root_v,
+    c_tip_v=c_tip_v,
+    c_avg_v=avg_chord_v,
+    quarter_c_v=quarter_chord_v,
+    fuse_length=fuselage_length,
+    fuse_diameter=np.round(fuselage_diameter, decimals=2),
+    w_loading_cruise=wing_loading_corrected[1],
+    w_loading_takeoff=wing_loading_corrected[0],
+    w_loading_supersonic=wing_loading_corrected[2],
+    w_loading_loiter=wing_loading_corrected[3],
+    thrust_weight_cruise=thrust_to_weight[1],
+    thrust_weight_takeoff=thrust_to_weight[0],
+    thrust_weight_loiter=thrust_to_weight[3],
+    thrust_weight_supersonic=thrust_to_weight[2],
+    cruise_thrust=thrust[1],
+    thrust_supersonic=thrust[2],
+    loiter_thrust=thrust[3],
+    thrust_takeoff=thrust[0],
+    x_cg=x_cg,
+    x_np=x_np,
+    static_margin=static_margin,
+    thrust_weight_climb=thrust_weight_climb,
+    climb_thrust=thrust_climb,
 )

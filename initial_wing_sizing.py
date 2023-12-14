@@ -40,6 +40,7 @@ def initial_wing_sizing(W0, M_subsonic):
                 c_root_new,
                 quarter_chord,
                 Y,
+                taper_ratio,
             ]
         ),
         decimals=2,

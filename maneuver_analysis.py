@@ -1,5 +1,6 @@
 import math
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def man_analysis(
@@ -41,4 +42,6 @@ def man_analysis(
     plt.plot(velocity, TRadius, color="red", label="Turn Radius [ft]")
     plt.title("Plot of Turn Rate and Turn Radius vs. Flight Speed")
     plt.legend()
-    # plt.show()
+    plt.show()
+
+    return np.round(np.array([thrust_weight_climb, thrust_climb]), decimals=2)

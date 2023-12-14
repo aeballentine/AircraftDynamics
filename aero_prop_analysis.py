@@ -136,4 +136,4 @@ def propulsion_analysis(
 
     v_star = findIntersection(D_a, thrust_cruise)
 
-    return v_star
+    return v_star, np.round(e_0, decimals=2), np.round(V_stall, decimals=2)
