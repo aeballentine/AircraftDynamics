@@ -577,6 +577,7 @@ trim_analysis(
     Y_h_tail=Y_h,
     c_h_tail=avg_chord_h,
     Cm_airfoil=cm_wing,
+    tc=tc,
 )
 
 print("~~~~~~~~~~~~~~~~~~~~~~~")
@@ -592,6 +593,8 @@ print("~~~~~~~~~~~~~~~~~~~~~~~")
     c_l_max=c_l_max,
 )
 
+print("~~~~~~~~~~~~~~~~~~~~~~~")
+print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 final_characteristics(
     R_sub=R_sub,
