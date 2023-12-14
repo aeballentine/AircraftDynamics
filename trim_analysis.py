@@ -31,8 +31,12 @@ def trim_analysis(
     CL_list = []
     Cm_list = []
     sweep_angle = sweep_angle * np.pi / 180  # conversion to radians
+    #lower_bound = round((np.pi/180)* (-3))
+    #upper_bound = round((np.pi/180)*3)
+    #for alpha_deg in (round(alpha_deg * 0.1, 1) for alpha_deg in range(-3, 3)):
     for alpha in (np.pi / 180) * np.array([-3, -2, -1, 0, 1, 2, 3]):
         for i_h in (np.pi / 180) * np.array([-10, 0, 10]):
+            #alpha = alpha_deg * (np.pi/180)
             alpha_list.append(alpha)
             beta = np.sqrt(1 - M_subsonic**2)
             eta = Cl_alpha / (2 * np.pi / beta)
@@ -40,7 +44,8 @@ def trim_analysis(
             S_exposed = S_wet / (1.977 + (0.52*tc))
             d = fuselage_diameter
             F = 1.07 * (1 + d / b_w) ** 2
-            CL_alpha_wing = (
+
+            CL_alpha_wing = ( #should be constant I think - not issue
                 2
                 * np.pi
                 * AR_wing
@@ -111,7 +116,7 @@ def trim_analysis(
             )
             CL_h = CL_alpha_h * (alpha + i_h)
             CL_total = CL_alpha_wing * (alpha + i_w) + n_h * CL_h * S_h_tail / S_wing
-
+            print("CMcg: ", Cm_CG)
             CL_list.append(CL_total)
             Cm_list.append(Cm_CG)
 
