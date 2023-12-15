@@ -80,7 +80,7 @@ def trim_analysis(
             CL_alpha_h = (
                 2
                 * np.pi
-                * AR_wing
+                * AR_h_tail
                 * (S_exposed_h / S_h_tail)
                 * F
                 # * 0.98
