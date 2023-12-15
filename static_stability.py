@@ -121,7 +121,7 @@ def center_of_gravity(
                 + fuel_weight
                 + all_else_weight
             ),
-            "Neutral point location": np.round(x_cg, decimals=2),
+            "Center of gravity location": np.round(x_cg, decimals=2),
         }
     )
 
@@ -268,5 +268,5 @@ def neutral_point_super(
         CL_alpha_wing * x_ac_wing
         + n_h * (S_h_tail / S_wing) * CL_alpha_h_tail * da_h_da * x_ac_h
     ) / (CL_alpha_wing + n_h * (S_h_tail / S_wing) * CL_alpha_h_tail * da_h_da)
-
+    print("Neutral point: ", x_np)
     return np.round(x_np, decimals=2)
