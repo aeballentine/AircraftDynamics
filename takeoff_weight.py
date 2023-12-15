@@ -84,15 +84,31 @@ def initial_weight_estimate(
     class IterationTable:
         def __init__(self):
             self.list = []
+            self.overleaf_table = " "
+            self.counter = 0
 
         def takeoff_weight(self, W0_guess):
+            self.counter = self.counter + 1
             W0_guess = W0_guess[0]
             self.list.append(np.round(W0_guess, decimals=2))
+            self.overleaf_table = (
+                self.overleaf_table
+                + str(np.round(self.counter, decimals=2))
+                + " & "
+                + str(np.round(W0_guess, decimals=2))
+                + " & "
+            )
             if W0_guess < 0:
                 err = 100
             else:
-                W_new = (W_crew + W_payload) / (
-                    1 - fuel_fraction - weight_ratio(W0_guess)
+                empty_weight_frac = weight_ratio(W0_guess)
+                W_new = (W_crew + W_payload) / (1 - fuel_fraction - empty_weight_frac)
+                self.overleaf_table = (
+                    self.overleaf_table
+                    + str(np.round(empty_weight_frac, decimals=2))
+                    + " & "
+                    + str(np.round(W_new, decimals=2))
+                    + " \ "
                 )
                 err = np.abs(W_new - W0_guess)
             return err
@@ -102,6 +118,8 @@ def initial_weight_estimate(
     W_calc = fsolve(iterations.takeoff_weight, np.array([W_guess]))
     iteration_table = iterations.list
     empty_weight = weight_ratio(W_calc[0]) * W_calc[0]
+
+    # print(iterations.overleaf_table)
 
     takeoff_weight = W_calc[0]
     W_climb = takeoff_weight * frac_taxi

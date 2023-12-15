@@ -45,7 +45,7 @@ c_l_max = 1.7  # from the airfoil plots
 xc_max = 0.83  # location of the maximum (x/c)
 tc = 0.14  # maximum thickness
 lift_slope = 6.5  # lift/radians
-cm_wing = 0.087  # moment coefficient of the airfoil
+cm_wing = -0.085  # moment coefficient of the airfoil
 
 # calculated values
 gamma = 1.4
@@ -56,7 +56,7 @@ V_super = M_super * np.sqrt(gamma * gas_constant * temp_cruise)
 wing_location = 7  # in ft, from the nose
 tail_end_v = 1  # in ft, from the end of the plane
 tail_end_h = 3  # in ft, from the end of the plane
-lift_slope_h = 5.3  # todo: fix this value
+lift_slope_h = 5.7  # todo: fix this value
 
 # run the takeoff weight sizing
 (
@@ -578,6 +578,11 @@ trim_analysis(
     c_h_tail=avg_chord_h,
     Cm_airfoil=cm_wing,
     tc=tc,
+    w_cruise=w_cruise,
+    V_c=V_c,
+    density_cruise=density_cruise,
+    b_h=b_h,
+    x_cg=x_cg,
 )
 
 print("~~~~~~~~~~~~~~~~~~~~~~~")
