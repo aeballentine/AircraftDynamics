@@ -39,15 +39,14 @@ def trim_analysis(
     # lower_bound = round((np.pi/180)* (-3))
     # upper_bound = round((np.pi/180)*3)
     # for alpha_deg in (round(alpha_deg * 0.1, 1) for alpha_deg in range(-3, 3)):
-    S_wet = S_wing - fuselage_diameter * c_root * 0.5
-    S_wet_h = S_h_tail - 0.3 * fuselage_diameter * c_root_h * 0.5
+    S_wet = S_wing - fuselage_diameter * c_root * 0.7
+    S_wet_h = S_h_tail - 0.3 * fuselage_diameter * c_root_h * 0.4
     print("The wing wetted area is: ", S_wet)
-    for alpha in (np.pi / 180) * np.array([2, 3, 4.5, 5.6, 6, 7, 8]):
-        for i_h in (np.pi / 180) * np.array([-4, 0, 4]):
+    for alpha in (np.pi / 180) * np.array([2, 3, 4, 5, 6, 7, 8]):
+        for i_h in (np.pi / 180) * np.array([-10, 0, 10]):
             # alpha = alpha_deg * (np.pi/180)
             alpha_list.append(alpha)
             beta = np.sqrt(1 - M_subsonic**2)
-            eta = Cl_alpha / (2 * np.pi / beta)
             eta = 1 + (8.2 - 2.3 * sweep_angle - AR_wing * (0.22 - 0.153)) / 100
             S_exposed = S_wet / (1.977 + (0.52 * tc))
             d = fuselage_diameter
@@ -70,12 +69,11 @@ def trim_analysis(
                 )
             )
 
-            i_w = 1 * np.pi / 180
-            n_h = 0.8  # assuming that the tail is fully out of the prop wash, Raymer pg. 606
+            i_w = 0 * np.pi / 180
+            n_h = 0.9  # assuming that the tail is fully out of the prop wash, Raymer pg. 606
 
             S_exposed_h = S_wet_h / (1.977 + (0.52 * 0.12))
 
-            eta_h = Cl_alpha_h / (2 * np.pi / beta)
             eta_h = 1 + AR_h_tail * (1.87 - 2.33 * 10**-4 * sweep_angle) / 100
             CL_alpha_h = (
                 2
@@ -115,10 +113,12 @@ def trim_analysis(
 
             CL_h = CL_alpha_h * (alpha + i_h)
 
+            print(x_ac_wing, x_cg)
             print(
                 CL_wing * (x_cg - x_ac_wing),
                 Cm_wing,
                 n_h * (S_h_tail / S_wing) * CL_h * (x_ac_h - x_cg),
+                CL_h,
             )
             Cm_CG = (
                 CL_wing * (x_cg - x_ac_wing)

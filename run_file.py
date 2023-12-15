@@ -45,7 +45,7 @@ c_l_max = 1.7  # from the airfoil plots
 xc_max = 0.83  # location of the maximum (x/c)
 tc = 0.14  # maximum thickness
 lift_slope = 6.5  # lift/radians
-cm_wing = -0.085  # moment coefficient of the airfoil
+cm_wing = -0.09  # moment coefficient of the airfoil
 
 # calculated values
 gamma = 1.4
